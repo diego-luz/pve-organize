@@ -1,0 +1,99 @@
+# PVE Organize
+
+**Grupos y separadores en el árbol de Proxmox VE.** Organiza tus VMs y contenedores en
+secciones de colores — como *Producción › Red*, *Pruebas*, *Plantilla* — directamente en la
+Server View, con una pantalla para elegir colores, orden y estilo.
+
+[English](README.md) · [Português (Brasil)](README.pt-BR.md) · **Español**
+
+[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
+![Proxmox VE 8 / 9](https://img.shields.io/badge/Proxmox%20VE-8%20%7C%209-orange)
+
+![Los seis estilos](docs/estilos.png)
+
+- **Dos niveles**: un *nivel superior* (título grande) y, si quieres, una *subcategoría*
+  (subtítulo) por servidor.
+- **Usa las etiquetas de Proxmox**, nada nuevo guardado en los servidores. Un servidor con
+  `Produccion;Red` aparece en **PRODUCCIÓN › Red**.
+- **Clic derecho → Mover a grupo** cambia el grupo en dos clics.
+- **Pantalla Grupos del árbol…**: crear grupos, elegir colores (o automáticos), arrastrar para
+  ordenar, 6 estilos, contador, sangría y un interruptor de encendido/apagado.
+- **Configuración compartida**: se guarda en las Notas del Datacenter y en Tag Style, así todos
+  los administradores y navegadores ven el mismo árbol.
+- **Sigue el idioma de Proxmox**: español, inglés y portugués (los demás usan inglés).
+- **Sobrevive a las actualizaciones de Proxmox** y se quita con un comando.
+
+> Proyecto de la comunidad, sin relación con Proxmox Server Solutions GmbH.
+
+---
+
+## Instalar
+
+En el nodo de Proxmox, como `root`:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+```
+
+Luego recarga la página de Proxmox (**F5**). Desde un clon, ejecuta `./install.sh`.
+
+Requisitos: Proxmox VE 8 o más nuevo (probado en 9.2). En un clúster, instálalo en cada nodo
+cuya interfaz web uses.
+
+## Uso
+
+1. **Pon los servidores en grupos.** Clic derecho en la VM/CT → **Mover a grupo** →
+   *Producción* → *Red*. O pon las etiquetas a mano (una de nivel superior y, si quieres, una de
+   subcategoría).
+2. **Ajusta.** Clic derecho en un servidor, en el nodo o en *Datacenter* → **Grupos del árbol…**
+
+| En la pantalla *Grupos del árbol* | |
+|---|---|
+| **Añadir** | escribe el nombre; la etiqueta se crea a partir de él (sin tildes ni espacios) |
+| **Color** | haz clic en la muestra para abrir el selector, o usa **Colores automáticos** |
+| **Orden** | arrastra por ☰; el orden de la lista es el orden del árbol |
+| **Servidores** | cuántos usan cada grupo; renombrar la etiqueta actualiza esos servidores |
+| **Apariencia** | estilo A–F, contador, sangría, ocultar etiquetas repetidas — el árbol cambia al instante; *Cancel* deshace |
+| **ACTIVADOS / DESACTIVADOS** | botón arriba: activa o desactiva al instante, sin perder nada |
+
+Los servidores sin una etiqueta de nivel superior conocida aparecen al final, en **Sin grupo**.
+
+## Comandos
+
+```bash
+pve-organize status        # activado / desactivado
+pve-organize off           # lo quita de la interfaz (la configuración se conserva)
+pve-organize on            # lo carga de nuevo
+pve-organize desinstalar   # quita todo lo instalado (también: uninstall)
+```
+
+## Cómo funciona
+
+- `/usr/local/share/pve-organize/pve-organize.js` se copia a `/usr/share/pve-manager/js/` y se
+  añade una línea `<script>` a `/usr/share/pve-manager/index.html.tpl`. Una copia limpia de esa
+  página queda en `/usr/local/share/pve-organize/index.html.tpl.original`.
+- Un hook de apt (`/etc/apt/apt.conf.d/99pve-organize`) vuelve a poner la línea tras las
+  actualizaciones de Proxmox.
+- Grupos, orden y estilo se guardan en un bloque oculto al final de **Datacenter → Notas**
+  (`<!-- pve-organize … -->`); los colores en **Datacenter → Opciones → Tag Style**.
+  No edites ese bloque a mano; el resto de tus notas no se toca.
+- Solo cambia la interfaz web. Mover un servidor solo cambia sus etiquetas.
+
+Permisos: mover un servidor requiere `VM.Config.Options` en él; guardar la pantalla
+*Grupos del árbol* requiere `Sys.Modify` en `/`.
+
+## Actualizar y desinstalar
+
+- **Actualizar**: ejecuta de nuevo el comando de instalación.
+- **Desinstalar**: `pve-organize desinstalar` y F5. Los grupos siguen en las Notas del Datacenter
+  y en Tag Style; bórralos allí si quieres.
+- **¿Algo se ve raro?** `pve-organize off` y F5 devuelven el árbol original de Proxmox.
+
+## Traducciones
+
+Los textos están en la tabla `TEXTOS` al inicio de `pve-organize.js` (una línea por texto:
+portugués, inglés, español). Se aceptan pull requests con más idiomas.
+
+## Licencia
+
+[MIT](LICENSE)

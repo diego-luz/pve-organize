@@ -1,0 +1,45 @@
+#!/bin/sh
+# pve-organize · https://github.com/diego-luz/pve-organize
+# Uso / usage: pve-organize on | off | status | desinstalar (uninstall)
+#   on           carrega o complemento na interface web (F5 no navegador depois)
+#   off          tira o complemento da interface (os grupos e cores continuam salvos)
+#   status       mostra se está ligado
+#   desinstalar  off + apaga os arquivos instalados (mantém grupos/cores nas Notas do Datacenter)
+# Grupos, ordem, cores, estilo e liga/desliga do visual: na interface web,
+# botão direito → "Grupos da árvore…".
+set -e
+DIR=/usr/local/share/pve-organize
+JS=$DIR/pve-organize.js
+DEST=/usr/share/pve-manager/js/pve-organize.js
+TPL=/usr/share/pve-manager/index.html.tpl
+MARCA=/etc/pve-organize.on
+HOOK=/etc/apt/apt.conf.d/99pve-organize
+
+aplicar() {
+    install -m 644 "$JS" "$DEST"
+    VER=$(md5sum "$DEST" | cut -c1-10)   # muda a cada versão: o navegador não usa cópia velha
+    sed -i '/pve-organize\.js/d' "$TPL"
+    sed -i "\#/pve2/js/pvemanagerlib.js#a\\
+    <script type=\"text/javascript\" src=\"/pve2/js/pve-organize.js?v=$VER\"></script>" "$TPL"
+}
+remover() {
+    sed -i '/pve-organize\.js/d' "$TPL"
+    rm -f "$DEST"
+}
+recarregar() { systemctl reload-or-restart pveproxy; }
+case "${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}" in pt*) L=pt ;; es*) L=es ;; *) L=en ;; esac
+m() { case $L in pt) echo "$1" ;; es) echo "$3" ;; *) echo "$2" ;; esac; }
+
+case "$1" in
+    on) aplicar; touch "$MARCA"; recarregar; m "separadores LIGADOS (F5 no navegador)" "separators ON (press F5 in the browser)" "separadores ACTIVADOS (F5 en el navegador)";;
+    off) remover; rm -f "$MARCA"; recarregar; m "separadores DESLIGADOS (F5 no navegador)" "separators OFF (press F5 in the browser)" "separadores DESACTIVADOS (F5 en el navegador)";;
+    reaplicar) [ -e "$MARCA" ] && aplicar || true;;   # usado pelo hook do apt depois de atualizar o Proxmox
+    status) if [ -e "$MARCA" ] && grep -q pve-organize.js "$TPL"; then m ligado on activado; else m desligado off desactivado; fi;;
+    desinstalar|uninstall)
+        remover; rm -f "$MARCA" "$HOOK"; recarregar
+        rm -rf "$DIR"; rm -f /usr/local/bin/pve-organize
+        m "Removido (F5 no navegador). Grupos e cores continuam nas Notas do Datacenter e no Tag Style." \
+          "Removed (press F5). Groups and colors stay in the Datacenter Notes and Tag Style." \
+          "Eliminado (F5). Grupos y colores siguen en las Notas del Datacenter y en Tag Style.";;
+    *) m "uso: pve-organize on|off|status|desinstalar" "usage: pve-organize on|off|status|uninstall" "uso: pve-organize on|off|status|desinstalar"; exit 1;;
+esac
