@@ -31,6 +31,27 @@
 
 ---
 
+## Por que não a Tag View ou os pools?
+
+O Proxmox VE já tem a **Tag View** (desde o 8.3) e a **Pool View**, e existem mods da comunidade
+que criam pastas. Eles resolvem problemas parecidos; o pve-organize mira outro: manter a
+**Server View** que você já usa, só que organizada.
+
+| | pve-organize | Tag View | Pool View | Mods que substituem o `pvemanagerlib.js` |
+|---|:-:|:-:|:-:|:-:|
+| Continua na Server View (agrupada por nó) | ✅ | ❌ | ❌ | varia |
+| Cada guest aparece em um único lugar | ✅ | ❌ (uma vez por tag) | ✅ | varia |
+| Dois níveis (grupo › subgrupo) | ✅ | ❌ | ❌ | ✅ |
+| Cores nos cabeçalhos, ordem própria, estilos | ✅ | ❌ | ❌ | ❌ |
+| Tela de configuração na interface web | ✅ | — | — | ❌ |
+| Configuração vale para o cluster inteiro | ✅ | ✅ | ✅ | ✅ (tags) |
+| Não altera arquivos do Proxmox | ✅ (injeta um script) | ✅ | ✅ | ❌ |
+| Sobrevive ao `apt upgrade` | ✅ (hook do apt) | ✅ | ✅ | geralmente ❌ |
+| Oficial / suportado pela Proxmox | ❌ | ✅ | ✅ | ❌ |
+
+Se você precisa de permissões por grupo, use **pools** — o pve-organize é só visual e pode ser
+usado junto com eles.
+
 ## Instalar
 
 Os comandos rodam **no próprio nó do Proxmox, como `root`**, e não no seu computador.
