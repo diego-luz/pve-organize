@@ -1,13 +1,18 @@
-# PVE Organize
+<div align="center">
 
-**Grupos e separadores na árvore do Proxmox VE.** Organize VMs e containers em seções
-coloridas — como *Produção › Rede*, *Teste*, *Modelo* — direto na Server View, com uma tela
-para escolher cores, ordem e estilo.
+<img src="docs/logo.svg" alt="pve-organize" width="420">
 
-[English](README.md) · **Português (Brasil)** · [Español](README.es.md)
+**Grupos e separadores na árvore do Proxmox VE.**
 
 [![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
 ![Testado no Proxmox VE 9.2](https://img.shields.io/badge/testado%20no-Proxmox%20VE%209.2-orange)
+
+[English](README.md) · **Português (Brasil)** · [Español](README.es.md)
+
+</div>
+
+> Organize VMs e containers em seções coloridas — como *Produção › Rede*, *Teste*,
+> *Modelo* — direto na Server View, com uma tela para escolher cores, ordem e estilo.
 
 ![Os seis estilos](docs/estilos.png)
 
