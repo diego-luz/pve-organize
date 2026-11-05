@@ -5,7 +5,7 @@
 **Grupos y separadores en el árbol de Proxmox VE.**
 
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
-![Probado en Proxmox VE 9.2](https://img.shields.io/badge/probado%20en-Proxmox%20VE%209.2-orange)
+![Probado en Proxmox VE 8.4 · 9.2](https://img.shields.io/badge/probado%20en-Proxmox%20VE%208.4%20%C2%B7%209.2-orange)
 
 [English](README.md) · [Português (Brasil)](README.pt-BR.md) · **Español**
 
@@ -86,7 +86,8 @@ cd pve-organize
 | Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Resultado |
 |---|---|---|---|---|
 | **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (probado con el tema oscuro y la interfaz en portugués) |
-| 8.x | — | — | — | ⚠️ no probado; el instalador lo permite y avisa |
+| **8.4** | 8.4.21 | — | — | ✅ funciona (probado en otro host y otra red) |
+| 8.0–8.3 | — | — | — | ⚠️ no probado; el instalador lo permite y avisa |
 
 Las versiones anteriores a la 8 son rechazadas por el instalador. Si lo pruebas en otra versión,
 abre un issue contando si funcionó. En un clúster, instálalo en cada nodo cuya interfaz web uses.
