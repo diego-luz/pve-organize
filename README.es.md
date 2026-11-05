@@ -7,7 +7,7 @@ Server View, con una pantalla para elegir colores, orden y estilo.
 [English](README.md) · [Português (Brasil)](README.pt-BR.md) · **Español**
 
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
-![Proxmox VE 8 / 9](https://img.shields.io/badge/Proxmox%20VE-8%20%7C%209-orange)
+![Probado en Proxmox VE 9.2](https://img.shields.io/badge/probado%20en-Proxmox%20VE%209.2-orange)
 
 ![Los seis estilos](docs/estilos.png)
 
@@ -54,8 +54,15 @@ cd pve-organize
 ```
 </details>
 
-Requisitos: Proxmox VE 8 o más nuevo (probado en 9.2). En un clúster, instálalo en cada nodo
-cuya interfaz web uses.
+### Versiones probadas
+
+| Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Resultado |
+|---|---|---|---|---|
+| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (probado con el tema oscuro y la interfaz en portugués) |
+| 8.x | — | — | — | ⚠️ no probado; el instalador lo permite y avisa |
+
+Las versiones anteriores a la 8 son rechazadas por el instalador. Si lo pruebas en otra versión,
+abre un issue contando si funcionó. En un clúster, instálalo en cada nodo cuya interfaz web uses.
 
 ## Uso
 

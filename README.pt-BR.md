@@ -7,7 +7,7 @@ para escolher cores, ordem e estilo.
 [English](README.md) · **Português (Brasil)** · [Español](README.es.md)
 
 [![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
-![Proxmox VE 8 / 9](https://img.shields.io/badge/Proxmox%20VE-8%20%7C%209-orange)
+![Testado no Proxmox VE 9.2](https://img.shields.io/badge/testado%20no-Proxmox%20VE%209.2-orange)
 
 ![Os seis estilos](docs/estilos.png)
 
@@ -53,8 +53,15 @@ cd pve-organize
 ```
 </details>
 
-Requisitos: Proxmox VE 8 ou mais novo (testado no 9.2). Em cluster, instale em cada nó cuja
-interface web você usa.
+### Versões testadas
+
+| Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Resultado |
+|---|---|---|---|---|
+| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (testado no tema escuro, interface em português) |
+| 8.x | — | — | — | ⚠️ não testado; o instalador permite e avisa |
+
+Versões anteriores à 8 são recusadas pelo instalador. Se testar em outra versão, abra uma
+issue contando se funcionou. Em cluster, instale em cada nó cuja interface web você usa.
 
 ## Usar
 

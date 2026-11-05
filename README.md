@@ -7,7 +7,7 @@ Server View, with a settings screen for colors, order and style.
 **English** · [Português (Brasil)](README.pt-BR.md) · [Español](README.es.md)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Proxmox VE 8 / 9](https://img.shields.io/badge/Proxmox%20VE-8%20%7C%209-orange)
+![Tested on Proxmox VE 9.2](https://img.shields.io/badge/tested%20on-Proxmox%20VE%209.2-orange)
 
 ![The six styles](docs/estilos.png)
 
@@ -53,8 +53,15 @@ cd pve-organize
 ```
 </details>
 
-Requirements: Proxmox VE 8 or newer (tested on 9.2). Run it on every node of a cluster whose
-web UI you use.
+### Tested versions
+
+| Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Result |
+|---|---|---|---|---|
+| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ works (tested with the dark theme and the Portuguese UI) |
+| 8.x | — | — | — | ⚠️ not tested; the installer allows it and warns |
+
+Older than 8 is refused by the installer. If you try it on another version, please open an
+issue saying whether it worked. In a cluster, install it on every node whose web UI you use.
 
 ## Use
 
