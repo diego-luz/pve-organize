@@ -28,13 +28,30 @@ para escolher cores, ordem e estilo.
 
 ## Instalar
 
-No nó do Proxmox, como `root`:
+Os comandos rodam **no próprio nó do Proxmox, como `root`**, e não no seu computador.
+Abra um terminal no nó de um destes jeitos:
+
+- **Pela interface web**: selecione o nó (ex.: `pve`) na árvore → **>_ Shell**.
+- **Por SSH**: `ssh root@<ip-do-nó>` a partir do seu computador.
+
+Nesse terminal, rode:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
 ```
 
-Depois recarregue a página do Proxmox (**F5**). De um clone, rode `./install.sh`.
+Depois volte para a página do Proxmox no **navegador** e recarregue (**F5**).
+
+<details>
+<summary>Instalar a partir de um clone (no mesmo terminal do nó)</summary>
+
+```bash
+apt install -y git          # se o git ainda não estiver instalado
+git clone https://github.com/diego-luz/pve-organize.git
+cd pve-organize
+./install.sh
+```
+</details>
 
 Requisitos: Proxmox VE 8 ou mais novo (testado no 9.2). Em cluster, instale em cada nó cuja
 interface web você usa.
@@ -57,6 +74,8 @@ interface web você usa.
 Servidores sem uma tag de topo conhecida aparecem no fim, em **Sem grupo**.
 
 ## Comandos
+
+No terminal do nó (**>_ Shell** da interface web ou SSH), como `root`:
 
 ```bash
 pve-organize status        # ligado / desligado

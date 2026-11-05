@@ -28,13 +28,30 @@ Server View, with a settings screen for colors, order and style.
 
 ## Install
 
-On the Proxmox node, as `root`:
+The commands run **on the Proxmox node itself, as `root`** — not on your own computer.
+Open a shell on the node in one of these ways:
+
+- **Web UI**: select the node (e.g. `pve`) in the tree → **>_ Shell**.
+- **SSH**: `ssh root@<node-ip>` from your computer.
+
+In that shell, run:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
 ```
 
-Then reload the Proxmox page (**F5**). From a clone, run `./install.sh` instead.
+Then go back to the Proxmox page in your **browser** and reload it (**F5**).
+
+<details>
+<summary>Install from a clone instead (same shell on the node)</summary>
+
+```bash
+apt install -y git          # if git is not installed yet
+git clone https://github.com/diego-luz/pve-organize.git
+cd pve-organize
+./install.sh
+```
+</details>
 
 Requirements: Proxmox VE 8 or newer (tested on 9.2). Run it on every node of a cluster whose
 web UI you use.
@@ -57,6 +74,8 @@ web UI you use.
 Guests without a known top-level tag appear at the end, under **No group**.
 
 ## Commands
+
+In the node's shell (web UI **>_ Shell** or SSH), as `root`:
 
 ```bash
 pve-organize status      # on / off
