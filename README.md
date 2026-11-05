@@ -15,7 +15,9 @@
 > *Testing*, *Template* — right inside the Server View, with a settings screen for colors,
 > order and style.
 
-![The six styles](docs/estilos.png)
+![pve-organize in action: moving a guest, changing the style live, turning it off and on](docs/demo.gif)
+
+<sub>All screenshots and animations use a fictitious lab (node `pve01`), not a real server.</sub>
 
 - **Two levels**: a *top level* (big header) and an optional *subcategory* (small header) per guest.
 - **Uses Proxmox tags** — nothing new to store on the guests. A guest tagged `Production;Network`
@@ -29,6 +31,32 @@
 - **Survives Proxmox updates** and is removed with a single command.
 
 > Community project, not affiliated with Proxmox Server Solutions GmbH.
+
+## Screenshots
+
+**Before and after** — the stock tree with tags, and the same guests with pve-organize:
+
+<img src="docs/antes-depois.png" alt="Before and after" width="560">
+
+**The six styles** (pick one in *Tree groups…*):
+
+<img src="docs/estilos.png" alt="The six styles" width="760">
+
+**Right-click → Move to group:**
+
+<img src="docs/menu.png" alt="Move to group menu" width="480">
+
+**Tree groups… screen** — colors, order, style and the ON/OFF switch:
+
+<img src="docs/tela-grupos.png" alt="Tree groups screen" width="720">
+
+**Dark and light themes:**
+
+<img src="docs/temas.png" alt="Dark and light themes" width="560">
+
+**Follows the Proxmox language** (Português and Español shown here):
+
+<img src="docs/idiomas.png" alt="Portuguese and Spanish" width="860">
 
 ---
 
@@ -69,6 +97,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/m
 
 Then go back to the Proxmox page in your **browser** and reload it (**F5**).
 
+<img src="docs/terminal-instalar.png" alt="Installing" width="720">
+
 <details>
 <summary>Install from a clone instead (same shell on the node)</summary>
 
@@ -84,7 +114,7 @@ cd pve-organize
 
 | Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Result |
 |---|---|---|---|---|
-| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ works (tested with the dark theme and the Portuguese UI) |
+| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ works (dark and light themes; English, Portuguese and Spanish UI) |
 | **8.4** | 8.4.21 | — | — | ✅ works (tested on another host and network) |
 | 8.0–8.3 | — | — | — | ⚠️ not tested; the installer allows it and warns |
 
@@ -113,11 +143,13 @@ Guests without a known top-level tag appear at the end, under **No group**.
 In the node's shell (web UI **>_ Shell** or SSH), as `root`:
 
 ```bash
-pve-organize status      # on / off
+pve-organize status      # ON/OFF, web UI script, apt hook, Proxmox version
 pve-organize off         # remove from the web UI (settings are kept)
 pve-organize on          # load it again
 pve-organize uninstall   # remove everything that was installed
 ```
+
+<img src="docs/terminal.gif" alt="status, off and on" width="640">
 
 ## How it works
 

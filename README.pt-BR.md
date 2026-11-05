@@ -14,7 +14,9 @@
 > Organize VMs e containers em seções coloridas — como *Produção › Rede*, *Teste*,
 > *Modelo* — direto na Server View, com uma tela para escolher cores, ordem e estilo.
 
-![Os seis estilos](docs/estilos.png)
+![pve-organize funcionando: movendo um guest, trocando o estilo ao vivo, desligando e ligando](docs/demo.gif)
+
+<sub>Todas as imagens e animações usam um laboratório fictício (nó `pve01`), não um servidor real.</sub>
 
 - **Dois níveis**: um *topo* (título grande) e, se quiser, uma *subcategoria* (subtítulo) por servidor.
 - **Usa as tags do Proxmox**, nada novo guardado nos servidores. Um servidor com as tags
@@ -28,6 +30,32 @@
 - **Continua depois das atualizações do Proxmox** e sai com um comando.
 
 > Projeto da comunidade, sem ligação com a Proxmox Server Solutions GmbH.
+
+## Imagens
+
+**Antes e depois** — a árvore padrão com as tags, e os mesmos guests com o pve-organize:
+
+<img src="docs/antes-depois.png" alt="Antes e depois" width="560">
+
+**Os seis estilos** (escolha um em *Grupos da árvore…*):
+
+<img src="docs/estilos.png" alt="Os seis estilos" width="760">
+
+**Botão direito → Mover para grupo:**
+
+<img src="docs/menu.png" alt="Menu Mover para grupo" width="480">
+
+**Tela Grupos da árvore…** — cores, ordem, estilo e o botão LIGADOS/DESLIGADOS:
+
+<img src="docs/tela-grupos.png" alt="Tela Grupos da árvore" width="720">
+
+**Tema escuro e claro:**
+
+<img src="docs/temas.png" alt="Tema escuro e claro" width="560">
+
+**Segue o idioma do Proxmox** (português e espanhol):
+
+<img src="docs/idiomas.png" alt="Português e espanhol" width="860">
 
 ---
 
@@ -68,6 +96,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/m
 
 Depois volte para a página do Proxmox no **navegador** e recarregue (**F5**).
 
+<img src="docs/terminal-instalar.png" alt="Instalando" width="720">
+
 <details>
 <summary>Instalar a partir de um clone (no mesmo terminal do nó)</summary>
 
@@ -83,7 +113,7 @@ cd pve-organize
 
 | Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Resultado |
 |---|---|---|---|---|
-| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (testado no tema escuro, interface em português) |
+| **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (tema escuro e claro; interface em inglês, português e espanhol) |
 | **8.4** | 8.4.21 | — | — | ✅ funciona (testado em outro host e outra rede) |
 | 8.0–8.3 | — | — | — | ⚠️ não testado; o instalador permite e avisa |
 
@@ -112,11 +142,13 @@ Servidores sem uma tag de topo conhecida aparecem no fim, em **Sem grupo**.
 No terminal do nó (**>_ Shell** da interface web ou SSH), como `root`:
 
 ```bash
-pve-organize status        # ligado / desligado
+pve-organize status        # ligado/desligado, script na interface, hook do apt, versão do Proxmox
 pve-organize off           # tira da interface (a configuração fica salva)
 pve-organize on            # carrega de novo
 pve-organize desinstalar   # remove tudo o que foi instalado
 ```
+
+<img src="docs/terminal.gif" alt="status, off e on" width="640">
 
 ## Como funciona
 
