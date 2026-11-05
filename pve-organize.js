@@ -424,7 +424,7 @@
     // liga/desliga pela interface (fica salvo; o complemento continua carregado para religar)
     const ligarDesligar = (ligar, depois) => {
         carregarConfig((dados) => {
-            let cfg = Ext.apply({}, CFG_ATUAL, { ativo: ligar });
+            let cfg = Object.assign({}, CFG_ATUAL, { ativo: ligar });
             Proxmox.Utils.API2Request({
                 url: '/cluster/options',
                 method: 'PUT',
@@ -558,7 +558,8 @@
             ],
             columns: [
                 {
-                    width: 28,
+                    width: 36,
+                    align: 'center',
                     sortable: false,
                     menuDisabled: true,
                     renderer: () => `<i class="fa fa-bars" style="opacity:.5;cursor:move" data-qtip="${T('arrasteDica')}"></i>`,
@@ -622,7 +623,13 @@
     const tagDoNome = (nome) => nome.normalize('NFD').replace(/[̀-ͯ]/g, '')
         .replace(/[^A-Za-z0-9_+.-]+/g, '').replace(/^[^A-Za-z0-9_]+/, '');
 
+    // a janela não é modal: a árvore fica visível (sem escurecer) para a pré-visualização ao vivo
+    let janelaAberta = null;
     const abrirTelaGrupos = () => {
+        if (janelaAberta && !janelaAberta.destroyed) {
+            janelaAberta.toFront();
+            return;
+        }
         carregarConfig((dados) => {
             let gTopo = gradeNivel(T('topo'), T('arraste'), CFG_ATUAL.topo || []);
             let gSub = gradeNivel(T('sub'), T('arraste'), CFG_ATUAL.sub || []);
@@ -695,7 +702,7 @@
             let janela = Ext.create('Ext.window.Window', {
                 title: T('tituloTela'),
                 iconCls: 'fa fa-folder-open-o',
-                modal: true,
+                modal: false,
                 width: 800,
                 height: 640,
                 layout: { type: 'vbox', align: 'stretch' },
@@ -821,6 +828,7 @@
                 });
             };
 
+            janelaAberta = janela;
             janela.show();
         });
     };

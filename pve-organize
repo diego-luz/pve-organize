@@ -34,7 +34,24 @@ case "$1" in
     on) aplicar; touch "$MARCA"; recarregar; m "separadores LIGADOS (F5 no navegador)" "separators ON (press F5 in the browser)" "separadores ACTIVADOS (F5 en el navegador)";;
     off) remover; rm -f "$MARCA"; recarregar; m "separadores DESLIGADOS (F5 no navegador)" "separators OFF (press F5 in the browser)" "separadores DESACTIVADOS (F5 en el navegador)";;
     reaplicar) [ -e "$MARCA" ] && aplicar || true;;   # usado pelo hook do apt depois de atualizar o Proxmox
-    status) if [ -e "$MARCA" ] && grep -q pve-organize.js "$TPL"; then m ligado on activado; else m desligado off desactivado; fi;;
+    status)
+        if [ -e "$MARCA" ] && grep -q pve-organize.js "$TPL"; then
+            m "pve-organize: LIGADO" "pve-organize: ON" "pve-organize: ACTIVADO"
+            m "  interface web : script carregado ($DEST)" "  web UI        : script loaded ($DEST)" "  interfaz web  : script cargado ($DEST)"
+        else
+            m "pve-organize: DESLIGADO" "pve-organize: OFF" "pve-organize: DESACTIVADO"
+            m "  interface web : script não carregado (pve-organize on para ligar)" "  web UI        : script not loaded (run pve-organize on)" "  interfaz web  : script no cargado (pve-organize on para activar)"
+        fi
+        if [ -e "$HOOK" ]; then
+            m "  hook do apt   : instalado (reaplica depois de atualizar o Proxmox)" "  apt hook      : installed (re-applies after Proxmox updates)" "  hook de apt   : instalado (se reaplica tras actualizar Proxmox)"
+        else
+            m "  hook do apt   : ausente" "  apt hook      : missing" "  hook de apt   : ausente"
+        fi
+        PV=$(pveversion 2>/dev/null | sed -n 's#^pve-manager/\([^/ ]*\).*#\1#p')
+        [ -n "$PV" ] && echo "  Proxmox VE    : $PV"
+        m "  grupos, cores e estilo: botão direito → \"Grupos da árvore…\" na interface" \
+          "  groups, colors and style: right-click → \"Tree groups…\" in the web UI" \
+          "  grupos, colores y estilo: clic derecho → \"Grupos del árbol…\" en la interfaz";;
     desinstalar|uninstall)
         remover; rm -f "$MARCA" "$HOOK"; recarregar
         rm -rf "$DIR"; rm -f /usr/local/bin/pve-organize
