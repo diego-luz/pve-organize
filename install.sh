@@ -31,10 +31,17 @@ command -v pveversion >/dev/null || erro "$(m 'isto não parece um Proxmox VE (p
 [ -f "$TPL" ] || erro "$(m 'não achei' 'not found:' 'no encontré') $TPL"
 VERSAO=$(pveversion | sed -n 's#^pve-manager/\([0-9]*\)\..*#\1#p')
 [ -n "$VERSAO" ] && [ "$VERSAO" -ge 8 ] || erro "$(m 'precisa do Proxmox VE 8 ou mais novo' 'needs Proxmox VE 8 or newer' 'necesita Proxmox VE 8 o más nuevo') ($(pveversion))"
-[ "$VERSAO" = 9 ] || info "$(m "aviso: testado no Proxmox VE 9; na versão $VERSAO pode precisar de ajuste." "warning: tested on Proxmox VE 9; version $VERSAO may need tweaks." "aviso: probado en Proxmox VE 9; la versión $VERSAO puede necesitar ajustes.")"
+MENOR=$(pveversion | sed -n 's#^pve-manager/[0-9]*\.\([0-9]*\).*#\1#p')
+if [ "$VERSAO" -gt 9 ] || { [ "$VERSAO" = 8 ] && [ "${MENOR:-0}" -lt 4 ]; }; then
+    info "$(m "aviso: testado no Proxmox VE 8.4 e 9; na versão $VERSAO.$MENOR pode precisar de ajuste." "warning: tested on Proxmox VE 8.4 and 9; version $VERSAO.$MENOR may need tweaks." "aviso: probado en Proxmox VE 8.4 y 9; la versión $VERSAO.$MENOR puede necesitar ajustes.")"
+fi
 
 # arquivos: do clone (se o install.sh estiver ao lado deles) ou baixados do GitHub
-AQUI=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo /nonexistent)
+# (só quando rodado como arquivo: em bash -c "$(curl …)" não há BASH_SOURCE e a pasta atual não conta)
+AQUI=/nonexistent
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    AQUI=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+fi
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 if [ -f "$AQUI/pve-organize.js" ] && [ -f "$AQUI/pve-organize" ]; then
@@ -47,6 +54,7 @@ else
         curl -fsSL "$BASE/$f" -o "$TMP/$f" || erro "$(m 'não consegui baixar' 'could not download' 'no pude descargar') $f"
     done
 fi
+head -1 "$TMP/pve-organize" | grep -q '^#!' || erro "pve-organize $(m 'inválido' 'is not valid' 'no válido')"
 grep -q "PVE.tree.ResourceTree" "$TMP/pve-organize.js" || erro "pve-organize.js $(m 'inválido' 'is not valid' 'no válido')"
 
 # versão antiga com outro nome (pve-separadores): limpar antes

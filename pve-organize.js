@@ -102,8 +102,8 @@
     let CFG_ATUAL = PADRAO;
 
     const mapa = (lista) => {
-        let ordem = {},
-            nome = {};
+        let ordem = Object.create(null),
+            nome = Object.create(null);
         lista.forEach(([tag, n], i) => {
             ordem[tag] = i;
             nome[tag] = n;
@@ -350,6 +350,7 @@
                 }
             },
             failure: (response) => {
+                configCarregada = true;
                 if (depois) {
                     Ext.Msg.alert(gettext('Error'), response.htmlStatus);
                 }
@@ -380,8 +381,8 @@
 
     const itemMenu = (texto, atual, handler, cor) => ({
         text: cor
-            ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${cor};margin-right:6px"></span>${texto}`
-            : texto,
+            ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${cor};margin-right:6px"></span>${Ext.String.htmlEncode(texto)}`
+            : Ext.String.htmlEncode(texto),
         iconCls: atual ? 'fa fa-fw fa-check' : 'fa fa-fw',
         handler: handler,
     });
@@ -390,7 +391,7 @@
         let ambAtual = ambienteDe(d),
             funAtual = funcaoDe(d);
         let ambientes = AMBIENTES.map(([amb, nomeAmb]) => ({
-            text: `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${corDe(amb, '#9e9e9e')};margin-right:6px"></span>${nomeAmb}`,
+            text: `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${corDe(amb, '#9e9e9e')};margin-right:6px"></span>${Ext.String.htmlEncode(nomeAmb)}`,
             iconCls: amb === ambAtual ? 'fa fa-fw fa-check' : 'fa fa-fw',
             menu: {
                 items: FUNCOES.map(([fun, nomeFun]) =>
@@ -415,9 +416,10 @@
 
     // notas do Datacenter com o nosso bloco trocado (o resto das notas fica igual)
     const notasCom = (descricao, cfg) => {
-        let notas = (descricao || '').replace(BLOCO, '');
+        let notas = (descricao || '').replace(new RegExp(BLOCO.source, 'g'), '\n');
+        let json = JSON.stringify(cfg).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
         let bloco = '<!-- pve-organize (saved by the Tree groups screen; do not edit this part)\n'
-            + JSON.stringify(cfg) + '\n-->';
+            + json + '\n-->';
         return (notas.trimEnd() ? notas.trimEnd() + '\n\n' : '') + bloco;
     };
 
@@ -464,7 +466,7 @@
 
     // "color-map" do Tag Style nativo → { tag: 'fundo' ou 'fundo:texto' }
     const mapaDeCores = (estiloTags) => {
-        let mapa = {};
+        let mapa = Object.create(null);
         ((estiloTags || {})['color-map'] || '').split(';').filter((x) => x.includes(':')).forEach((x) => {
             let [t, ...resto] = x.split(':');
             mapa[t] = resto.join(':');
@@ -601,6 +603,7 @@
                 {
                     text: T('nome'),
                     dataIndex: 'nome',
+                    renderer: (v) => Ext.String.htmlEncode(v || ''),
                     flex: 1,
                     sortable: false,
                     editor: { xtype: 'textfield', allowBlank: false },
@@ -761,7 +764,7 @@
                             return;
                         }
                         if (!TAG_OK.test(tag)) {
-                            erros.push(T('erroTag', nome));
+                            erros.push(T('erroTag', Ext.String.htmlEncode(nome)));
                             return;
                         }
                         if (vistas[tag]) {
@@ -793,19 +796,35 @@
                     return;
                 }
 
+                janela.mask(T('salvando'));
+                // relê as opções agora: a janela não é modal e alguém pode ter mudado as notas nesse meio tempo
+                Proxmox.Utils.API2Request({
+                    url: '/cluster/options',
+                    method: 'GET',
+                    failure: (response) => {
+                        janela.unmask();
+                        Ext.Msg.alert(gettext('Error'), response.htmlStatus);
+                    },
+                    success: (response) => gravar(response.result.data || {}, cfg, renomes),
+                });
+            };
+
+            const gravar = (dados, cfg, renomes) => {
                 // cores: no "Tag Style" nativo, mantendo as cores de outras tags
                 let estiloTags = Ext.apply({}, dados['tag-style'] || {});
                 let mapaCores = mapaDeCores(estiloTags);
 
-                // cor que cada tag tinha antes de virar grupo ('' = sem cor própria), para devolver ao remover
-                let tagsAntes = (CFG_ATUAL.topo || []).concat(CFG_ATUAL.sub || []).map(([t]) => t);
+                // cor que cada tag tinha antes de virar grupo ('' = sem cor própria), para devolver ao remover.
+                // Sem configuração salva, os grupos de exemplo ainda não mudaram a cor de nenhuma tag.
+                let salvaAntes = lerConfig(dados.description) || {};
+                let tagsAntes = (salvaAntes.topo || []).concat(salvaAntes.sub || []).map(([t]) => t);
                 let tagsAgora = cfg.topo.concat(cfg.sub).map(([t]) => t);
-                let origAntes = CFG_ATUAL.cores_orig || {};
+                let origAntes = salvaAntes.cores_orig || {};
                 let renomeadas = renomes.map(([antiga]) => antiga);
-                let coresOrig = {};
+                let coresOrig = Object.create(null);
                 tagsAgora.forEach((t) => {
                     if (tagsAntes.includes(t)) {
-                        if (t in origAntes) {
+                        if (Object.hasOwn(origAntes, t)) {
                             coresOrig[t] = origAntes[t];
                         }
                     } else {
@@ -815,7 +834,7 @@
                 tagsAntes.filter((t) => !tagsAgora.includes(t)).forEach((t) => {
                     if (renomeadas.includes(t)) {
                         delete mapaCores[t]; // a tag some dos servidores
-                    } else if (t in origAntes) {
+                    } else if (Object.hasOwn(origAntes, t)) {
                         if (origAntes[t]) {
                             mapaCores[t] = origAntes[t];
                         } else {
@@ -836,14 +855,10 @@
                     mapaCores[tag] = `${cor}:${texto}`;
                 });
                 estiloTags['color-map'] = Object.entries(mapaCores).map(([t, c]) => `${t}:${c}`).join(';');
-                estiloTags['case-sensitive'] = 1;
-                estiloTags.shape = estiloTags.shape || 'full';
-                estiloTags.ordering = estiloTags.ordering || 'config';
                 let estiloTxt = Object.entries(estiloTags)
                     .filter(([, v]) => v !== undefined && v !== null && v !== '')
                     .map(([k, v]) => `${k}=${v}`).join(',');
 
-                janela.mask(T('salvando'));
                 Proxmox.Utils.API2Request({
                     url: '/cluster/options',
                     method: 'PUT',
@@ -856,17 +871,19 @@
                         salvo = true;
                         usarConfig(cfg);
                         // tags renomeadas: atualizar os servidores que usavam a antiga
-                        renomes.forEach(([antiga, nova]) => {
-                            PVE.data.ResourceStore.getData().items.forEach((r) => {
-                                let d = r.data;
-                                if (isGuest(d) && tagsDe(d).includes(antiga)) {
-                                    let tags = tagsDe(d).map((t) => (t === antiga ? nova : t));
-                                    Proxmox.Utils.API2Request({
-                                        url: `/nodes/${d.node}/${d.type}/${d.vmid}/config`,
-                                        method: 'PUT',
-                                        params: { tags: tags.join(';') },
-                                    });
-                                }
+                        let troca = Object.fromEntries(renomes);
+                        PVE.data.ResourceStore.getData().items.forEach((r) => {
+                            let d = r.data;
+                            if (!isGuest(d) || !tagsDe(d).some((t) => Object.hasOwn(troca, t))) {
+                                return;
+                            }
+                            let tags = tagsDe(d).map((t) => (Object.hasOwn(troca, t) ? troca[t] : t));
+                            Proxmox.Utils.API2Request({
+                                url: `/nodes/${d.node}/${d.type}/${d.vmid}/config`,
+                                method: 'PUT',
+                                params: { tags: [...new Set(tags)].join(';') },
+                                failure: (response) => Ext.Msg.alert(gettext('Error'),
+                                    `${d.vmid} (${Ext.String.htmlEncode(d.name || '')}): ${response.htmlStatus}`),
                             });
                         });
                         PVE.UIOptions.update();

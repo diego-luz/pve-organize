@@ -21,6 +21,12 @@ aplicar() {
     sed -i '/pve-organize\.js/d' "$TPL"
     sed -i "\#/pve2/js/pvemanagerlib.js#a\\
     <script type=\"text/javascript\" src=\"/pve2/js/pve-organize.js?v=$VER\"></script>" "$TPL"
+    grep -q 'pve-organize\.js' "$TPL" || {
+        m "ERRO: não achei a linha do pvemanagerlib.js em $TPL (versão nova do Proxmox?)" \
+          "ERROR: pvemanagerlib.js line not found in $TPL (new Proxmox version?)" \
+          "ERROR: no encontré la línea de pvemanagerlib.js en $TPL (¿versión nueva de Proxmox?)" >&2
+        exit 1
+    }
 }
 remover() {
     sed -i '/pve-organize\.js/d' "$TPL"
