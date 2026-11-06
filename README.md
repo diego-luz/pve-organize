@@ -115,12 +115,27 @@ Then go back to the Proxmox page in your **browser** and reload it (**F5**).
 <img src="docs/terminal-instalar.png" alt="Installing" width="720">
 
 <details>
-<summary>Install from a clone instead (same shell on the node)</summary>
+<summary>Download the files first, check them, then install (same shell on the node)</summary>
+
+```bash
+mkdir -p ~/pve-organize && cd ~/pve-organize
+for f in install.sh pve-organize pve-organize.js SHA256SUMS; do
+    curl -fsSLO https://github.com/diego-luz/pve-organize/releases/latest/download/$f
+done
+sha256sum -c SHA256SUMS     # every line must say OK
+less install.sh             # optional: read what it does (q to quit)
+bash install.sh             # installs the files from this folder
+```
+</details>
+
+<details>
+<summary>Install from a clone (same shell on the node)</summary>
 
 ```bash
 apt install -y git          # if git is not installed yet
 git clone https://github.com/diego-luz/pve-organize.git
 cd pve-organize
+git checkout "$(git describe --tags --abbrev=0)"   # latest release (skip it for the main branch)
 ./install.sh
 ```
 </details>

@@ -114,12 +114,27 @@ Depois volte para a página do Proxmox no **navegador** e recarregue (**F5**).
 <img src="docs/terminal-instalar.png" alt="Instalando" width="720">
 
 <details>
+<summary>Baixar os arquivos primeiro, conferir e depois instalar (no mesmo terminal do nó)</summary>
+
+```bash
+mkdir -p ~/pve-organize && cd ~/pve-organize
+for f in install.sh pve-organize pve-organize.js SHA256SUMS; do
+    curl -fsSLO https://github.com/diego-luz/pve-organize/releases/latest/download/$f
+done
+sha256sum -c SHA256SUMS     # todas as linhas precisam dizer OK
+less install.sh             # opcional: ler o que ele faz (q para sair)
+bash install.sh             # instala os arquivos desta pasta
+```
+</details>
+
+<details>
 <summary>Instalar a partir de um clone (no mesmo terminal do nó)</summary>
 
 ```bash
 apt install -y git          # se o git ainda não estiver instalado
 git clone https://github.com/diego-luz/pve-organize.git
 cd pve-organize
+git checkout "$(git describe --tags --abbrev=0)"   # última versão (pule para usar a branch main)
 ./install.sh
 ```
 </details>
