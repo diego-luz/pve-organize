@@ -1,17 +1,22 @@
 #!/bin/bash
 # pve-organize: grupos e separadores na árvore do Proxmox VE · groups and separators for the Proxmox VE tree
 #
-# Instalar (no shell do Proxmox, como root):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
-# Ou, de um clone do repositório:
-#   ./install.sh
-# Desinstalar:
-#   pve-organize desinstalar
+# Instalar a última versão publicada (no shell do Proxmox, como root):
+#   bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/latest/download/install.sh)"
+# Uma versão específica:   REF=v1.0.0 bash -c "$(curl -fsSL …/releases/download/v1.0.0/install.sh)"
+# Versão em desenvolvimento (sem checksum): REF=main bash -c "$(curl -fsSL …)"
+# Ou, de um clone do repositório:   ./install.sh
+# Desinstalar:   pve-organize desinstalar
 set -euo pipefail
 
+VERSAO_PACOTE=1.0.0   # trocado pelo scripts/release.sh a cada versão
 REPO=${REPO:-diego-luz/pve-organize}
-REF=${REF:-main}
-BASE=${BASE:-https://raw.githubusercontent.com/$REPO/$REF}
+REF=${REF:-v$VERSAO_PACOTE}
+case "$REF" in
+    v[0-9]*) BASE_PADRAO=https://github.com/$REPO/releases/download/$REF; CONFERIR=1 ;;
+    *) BASE_PADRAO=https://raw.githubusercontent.com/$REPO/$REF; CONFERIR=0 ;;   # branch: sem SHA256SUMS
+esac
+BASE=${BASE:-$BASE_PADRAO}
 DIR=/usr/local/share/pve-organize
 TPL=/usr/share/pve-manager/index.html.tpl
 HOOK=/etc/apt/apt.conf.d/99pve-organize
@@ -53,6 +58,18 @@ else
     for f in pve-organize.js pve-organize; do
         curl -fsSL "$BASE/$f" -o "$TMP/$f" || erro "$(m 'não consegui baixar' 'could not download' 'no pude descargar') $f"
     done
+    if [ "$CONFERIR" = 1 ]; then
+        # confere a "impressão digital" (SHA-256) de cada arquivo com a lista publicada na versão
+        curl -fsSL "$BASE/SHA256SUMS" -o "$TMP/SHA256SUMS" || erro "$(m 'não consegui baixar' 'could not download' 'no pude descargar') SHA256SUMS"
+        for f in pve-organize.js pve-organize; do
+            grep -q "  $f\$" "$TMP/SHA256SUMS" || erro "SHA256SUMS: $(m 'falta' 'missing' 'falta') $f"
+        done
+        (cd "$TMP" && grep -E '  pve-organize(\.js)?$' SHA256SUMS | sha256sum -c --quiet -) \
+            || erro "$(m 'checksum NÃO confere: arquivos corrompidos ou alterados; nada foi instalado' 'checksum MISMATCH: files are corrupted or altered; nothing was installed' 'el checksum NO coincide: archivos dañados o alterados; no se instaló nada')"
+        info "$(m 'checksums conferidos (SHA-256)' 'checksums verified (SHA-256)' 'checksums verificados (SHA-256)')"
+    else
+        info "$(m "aviso: versão de desenvolvimento ($REF), sem conferência de checksum" "warning: development version ($REF), no checksum verification" "aviso: versión de desarrollo ($REF), sin verificación de checksum")"
+    fi
 fi
 head -1 "$TMP/pve-organize" | grep -q '^#!' || erro "pve-organize $(m 'inválido' 'is not valid' 'no válido')"
 grep -q "PVE.tree.ResourceTree" "$TMP/pve-organize.js" || erro "pve-organize.js $(m 'inválido' 'is not valid' 'no válido')"
@@ -85,17 +102,17 @@ m "Pronto! Agora:
   2. Botão direito em um servidor → \"Mover para grupo\" (ou coloque as tags à mão).
   3. Botão direito → \"Grupos da árvore…\" para criar grupos, cores, ordem e estilo.
 
-Comandos: pve-organize on | off | status | desinstalar
+Comandos: pve-organize on | off | status | version | desinstalar
 " "Done! Now:
   1. Reload the Proxmox page (F5).
   2. Right-click a guest → \"Move to group\" (or add the tags by hand).
   3. Right-click → \"Tree groups…\" to create groups, colors, order and style.
 
-Commands: pve-organize on | off | status | uninstall
+Commands: pve-organize on | off | status | version | uninstall
 " "¡Listo! Ahora:
   1. Recarga la página de Proxmox (F5).
   2. Clic derecho en un servidor → \"Mover a grupo\" (o pon las etiquetas a mano).
   3. Clic derecho → \"Grupos del árbol…\" para crear grupos, colores, orden y estilo.
 
-Comandos: pve-organize on | off | status | desinstalar
+Comandos: pve-organize on | off | status | version | desinstalar
 "

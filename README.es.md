@@ -93,8 +93,23 @@ Abre una terminal en el nodo de una de estas formas:
 En esa terminal, ejecuta:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/latest/download/install.sh)"
 ```
+
+Esto instala la última [versión publicada](https://github.com/diego-luz/pve-organize/releases).
+Antes de instalar, el script verifica cada archivo descargado con el `SHA256SUMS` de la versión
+y se detiene si algo no coincide.
+
+<details>
+<summary>Una versión específica, o la versión en desarrollo</summary>
+
+```bash
+# una versión específica (p. ej. para volver a una anterior)
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.0/install.sh)"
+# versión en desarrollo, de la rama main (sin verificación de checksum)
+REF=main bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+```
+</details>
 
 Luego vuelve a la página de Proxmox en el **navegador** y recárgala (**F5**).
 
@@ -145,7 +160,8 @@ Los servidores sin una etiqueta de nivel superior conocida aparecen al final, en
 En la terminal del nodo (**>_ Shell** de la interfaz web o SSH), como `root`:
 
 ```bash
-pve-organize status        # activado/desactivado, script en la interfaz, hook de apt, versión de Proxmox
+pve-organize status        # versión, activado/desactivado, script en la interfaz, hook de apt, versión de Proxmox
+pve-organize version       # versión instalada
 pve-organize off           # lo quita de la interfaz (la configuración se conserva)
 pve-organize on            # lo carga de nuevo
 pve-organize desinstalar   # quita todo lo instalado (también: uninstall)
@@ -170,7 +186,8 @@ Permisos: mover un servidor requiere `VM.Config.Options` en él; guardar la pant
 
 ## Actualizar y desinstalar
 
-- **Actualizar**: ejecuta de nuevo el comando de instalación.
+- **Actualizar**: ejecuta de nuevo el comando de instalación (siempre obtiene la última versión).
+  Qué cambió en cada versión: [CHANGELOG.md](CHANGELOG.md).
 - **Desinstalar**: `pve-organize desinstalar` y F5. Los grupos siguen en las Notas del Datacenter
   y en Tag Style; bórralos allí si quieres.
 - **¿Algo se ve raro?** `pve-organize off` y F5 devuelven el árbol original de Proxmox.

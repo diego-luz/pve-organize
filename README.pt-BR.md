@@ -91,8 +91,23 @@ Abra um terminal no nó de um destes jeitos:
 Nesse terminal, rode:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/latest/download/install.sh)"
 ```
+
+Isso instala a última [versão publicada](https://github.com/diego-luz/pve-organize/releases).
+Antes de instalar, o script confere cada arquivo baixado com o `SHA256SUMS` da versão e para
+se algo não bater.
+
+<details>
+<summary>Uma versão específica, ou a versão em desenvolvimento</summary>
+
+```bash
+# uma versão específica (ex.: para voltar a uma anterior)
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.0/install.sh)"
+# versão em desenvolvimento, da branch main (sem conferência de checksum)
+REF=main bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+```
+</details>
 
 Depois volte para a página do Proxmox no **navegador** e recarregue (**F5**).
 
@@ -142,7 +157,8 @@ Servidores sem uma tag de topo conhecida aparecem no fim, em **Sem grupo**.
 No terminal do nó (**>_ Shell** da interface web ou SSH), como `root`:
 
 ```bash
-pve-organize status        # ligado/desligado, script na interface, hook do apt, versão do Proxmox
+pve-organize status        # versão, ligado/desligado, script na interface, hook do apt, versão do Proxmox
+pve-organize version       # versão instalada
 pve-organize off           # tira da interface (a configuração fica salva)
 pve-organize on            # carrega de novo
 pve-organize desinstalar   # remove tudo o que foi instalado
@@ -167,7 +183,8 @@ pede `Sys.Modify` em `/`.
 
 ## Atualizar e desinstalar
 
-- **Atualizar**: rode o comando de instalação de novo.
+- **Atualizar**: rode o comando de instalação de novo (ele sempre pega a última versão).
+  O que mudou em cada versão: [CHANGELOG.md](CHANGELOG.md).
 - **Desinstalar**: `pve-organize desinstalar` e F5. Os grupos continuam nas Notas do Datacenter
   e no Tag Style; apague por lá se quiser.
 - **Algo estranho?** `pve-organize off` e F5 trazem de volta a árvore original do Proxmox.

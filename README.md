@@ -92,8 +92,23 @@ Open a shell on the node in one of these ways:
 In that shell, run:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/latest/download/install.sh)"
 ```
+
+This installs the latest [release](https://github.com/diego-luz/pve-organize/releases). Before
+installing, the script checks every downloaded file against the release's `SHA256SUMS` and
+stops if anything doesn't match.
+
+<details>
+<summary>A specific version, or the development version</summary>
+
+```bash
+# a specific version (e.g. to go back to an older one)
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.0/install.sh)"
+# development version from the main branch (no checksum verification)
+REF=main bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
+```
+</details>
 
 Then go back to the Proxmox page in your **browser** and reload it (**F5**).
 
@@ -143,7 +158,8 @@ Guests without a known top-level tag appear at the end, under **No group**.
 In the node's shell (web UI **>_ Shell** or SSH), as `root`:
 
 ```bash
-pve-organize status      # ON/OFF, web UI script, apt hook, Proxmox version
+pve-organize status      # version, ON/OFF, web UI script, apt hook, Proxmox version
+pve-organize version     # installed version
 pve-organize off         # remove from the web UI (settings are kept)
 pve-organize on          # load it again
 pve-organize uninstall   # remove everything that was installed
@@ -167,7 +183,8 @@ needs `Sys.Modify` on `/`.
 
 ## Update and uninstall
 
-- **Update**: run the install command again.
+- **Update**: run the install command again (it always gets the latest release).
+  What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 - **Uninstall**: `pve-organize uninstall`, then F5. Your groups stay in the Datacenter Notes and
   Tag Style; delete them there if you want.
 - **Something looks wrong?** `pve-organize off` and F5 brings back the stock Proxmox tree.
