@@ -1,0 +1,59 @@
+name: Landing page
+
+# Publishes site/ to GitHub Pages. Images come from docs/ (site/img is a
+# symlink), so the landing always shows the same screens as the README.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site/img
+          cp site/index.html site/favicon.svg _site/
+          for f in demo.gif antes-depois.png estilos.png tela-grupos.png menu.png temas.png idiomas.png; do
+            cp "docs/$f" _site/img/
+          done
+          touch _site/.nojekyll
+
+      - name: Check that every referenced image exists
+        run: |
+          grep -oE "img/[A-Za-z0-9._-]+\.(png|gif|svg)|f: '[A-Za-z0-9._-]+\.(png|gif|svg)'" site/index.html \
+            | sed -E "s#^img/##; s#^f: '##; s#'\$##" | sort -u \
+            | while read -r f; do test -f "_site/img/$f" || { echo "faltando: $f"; exit 1; }; done
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
