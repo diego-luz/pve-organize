@@ -462,6 +462,16 @@
     const contarServidores = (tag) =>
         PVE.data.ResourceStore.getData().items.filter((r) => isGuest(r.data) && tagsDe(r.data).includes(tag)).length;
 
+    // "color-map" do Tag Style nativo → { tag: 'fundo' ou 'fundo:texto' }
+    const mapaDeCores = (estiloTags) => {
+        let mapa = {};
+        ((estiloTags || {})['color-map'] || '').split(';').filter((x) => x.includes(':')).forEach((x) => {
+            let [t, ...resto] = x.split(':');
+            mapa[t] = resto.join(':');
+        });
+        return mapa;
+    };
+
     // seletor de cor nativo do navegador, aberto no ponto do clique
     const escolherCor = (rec, e) => {
         document.querySelectorAll('input.sep-seletor').forEach((velho) => velho.remove());
@@ -476,6 +486,7 @@
         });
         document.body.appendChild(inp);
         let sair = () => Ext.defer(() => inp.remove(), 300);
+        rec.corManual = true;
         inp.addEventListener('input', () => rec.set('cor', inp.value));
         inp.addEventListener('change', () => {
             rec.set('cor', inp.value);
@@ -492,10 +503,23 @@
         }, 10);
     };
 
-    const gradeNivel = (titulo, ajuda, linhas) => {
+    const gradeNivel = (titulo, ajuda, linhas, coresTags) => {
         let store = Ext.create('Ext.data.Store', {
             fields: ['tag', 'nome', 'cor', 'orig'],
             data: linhas.map(([tag, nome, cor]) => ({ tag, nome, cor: '#' + (cor || '9e9e9e'), orig: tag })),
+            listeners: {
+                // grupo novo com uma tag que já tem cor (Datacenter → Options → Tag Style): usa essa cor
+                update: (st, rec, op, campos) => {
+                    if (rec.get('orig') || rec.corManual || !campos || !campos.some((c) => c === 'tag' || c === 'nome')) {
+                        return;
+                    }
+                    let tag = (rec.get('tag') || '').trim() || tagDoNome((rec.get('nome') || '').trim());
+                    let fundo = ((coresTags || {})[tag] || '').split(':')[0];
+                    if (/^[0-9a-fA-F]{6}$/.test(fundo)) {
+                        rec.set('cor', '#' + fundo.toLowerCase());
+                    }
+                },
+            },
         });
         let grade;
         let todasCores = () => {
@@ -631,8 +655,9 @@
             return;
         }
         carregarConfig((dados) => {
-            let gTopo = gradeNivel(T('topo'), T('arraste'), CFG_ATUAL.topo || []);
-            let gSub = gradeNivel(T('sub'), T('arraste'), CFG_ATUAL.sub || []);
+            let coresTags = mapaDeCores(dados['tag-style']);
+            let gTopo = gradeNivel(T('topo'), T('arraste'), CFG_ATUAL.topo || [], coresTags);
+            let gSub = gradeNivel(T('sub'), T('arraste'), CFG_ATUAL.sub || [], coresTags);
             let rascunho = Ext.apply({}, CFG_ATUAL);
             let previa = () => aplicarVisual(rascunho);
             let esconder = Ext.create('Ext.form.field.Checkbox', {
@@ -768,17 +793,41 @@
                     return;
                 }
 
+                // cores: no "Tag Style" nativo, mantendo as cores de outras tags
+                let estiloTags = Ext.apply({}, dados['tag-style'] || {});
+                let mapaCores = mapaDeCores(estiloTags);
+
+                // cor que cada tag tinha antes de virar grupo ('' = sem cor própria), para devolver ao remover
+                let tagsAntes = (CFG_ATUAL.topo || []).concat(CFG_ATUAL.sub || []).map(([t]) => t);
+                let tagsAgora = cfg.topo.concat(cfg.sub).map(([t]) => t);
+                let origAntes = CFG_ATUAL.cores_orig || {};
+                let renomeadas = renomes.map(([antiga]) => antiga);
+                let coresOrig = {};
+                tagsAgora.forEach((t) => {
+                    if (tagsAntes.includes(t)) {
+                        if (t in origAntes) {
+                            coresOrig[t] = origAntes[t];
+                        }
+                    } else {
+                        coresOrig[t] = mapaCores[t] || '';
+                    }
+                });
+                tagsAntes.filter((t) => !tagsAgora.includes(t)).forEach((t) => {
+                    if (renomeadas.includes(t)) {
+                        delete mapaCores[t]; // a tag some dos servidores
+                    } else if (t in origAntes) {
+                        if (origAntes[t]) {
+                            mapaCores[t] = origAntes[t];
+                        } else {
+                            delete mapaCores[t]; // volta à cor automática do Proxmox
+                        }
+                    }
+                });
+                cfg.cores_orig = coresOrig;
+
                 // notas do Datacenter: troca só o nosso bloco, o resto das notas fica
                 let notas = notasCom(dados.description, cfg);
 
-                // cores: no "Tag Style" nativo, mantendo as cores de outras tags
-                let estiloTags = Ext.apply({}, dados['tag-style'] || {});
-                let mapaCores = {};
-                (estiloTags['color-map'] || '').split(';').filter((x) => x.includes(':')).forEach((x) => {
-                    let [t, ...resto] = x.split(':');
-                    mapaCores[t] = resto.join(':');
-                });
-                renomes.forEach(([antiga]) => delete mapaCores[antiga]);
                 cfg.topo.concat(cfg.sub).forEach(([tag, , cor]) => {
                     let r = parseInt(cor.slice(0, 2), 16),
                         g = parseInt(cor.slice(2, 4), 16),
