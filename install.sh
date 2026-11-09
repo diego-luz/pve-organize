@@ -3,13 +3,13 @@
 #
 # Instalar a última versão publicada (no shell do Proxmox, como root):
 #   bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/latest/download/install.sh)"
-# Uma versão específica:   REF=v1.0.1 bash -c "$(curl -fsSL …/releases/download/v1.0.1/install.sh)"
+# Uma versão específica:   REF=v1.0.2 bash -c "$(curl -fsSL …/releases/download/v1.0.2/install.sh)"
 # Versão em desenvolvimento (sem checksum): REF=main bash -c "$(curl -fsSL …)"
 # Ou, de um clone do repositório:   ./install.sh
 # Desinstalar:   pve-organize desinstalar
 set -euo pipefail
 
-VERSAO_PACOTE=1.0.1   # trocado pelo scripts/release.sh a cada versão
+VERSAO_PACOTE=1.0.2   # trocado pelo scripts/release.sh a cada versão
 REPO=${REPO:-diego-luz/pve-organize}
 REF=${REF:-v$VERSAO_PACOTE}
 case "$REF" in

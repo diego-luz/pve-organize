@@ -104,7 +104,7 @@ stops if anything doesn't match.
 
 ```bash
 # a specific version (e.g. to go back to an older one)
-bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.1/install.sh)"
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.2/install.sh)"
 # development version from the main branch (no checksum verification)
 REF=main bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
 ```

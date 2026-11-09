@@ -2,7 +2,7 @@
 
 All notable changes to pve-organize. Versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.2] — 2026-11-09
 
 ### Fixed
 - **Clusters with Tag Style → case-sensitive off (the Proxmox default):** Proxmox saves tags in
