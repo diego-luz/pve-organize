@@ -2,6 +2,13 @@
 
 All notable changes to pve-organize. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Renaming a group in **Tree groups…** now renames its tag too (and the guests that use it), as long
+  as the tag was still the one derived from the old name. Before, a group renamed from "Template" to
+  "Clients" kept showing the `Template` tag on its guests. A tag edited by hand is left alone.
+
 ## [1.0.0] — 2026-11-06
 
 First numbered release. Tested on Proxmox VE 9.2 and 8.4.

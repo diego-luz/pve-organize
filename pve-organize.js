@@ -539,7 +539,25 @@
             margin: 4,
             store: store,
             border: true,
-            plugins: [{ ptype: 'cellediting', clicksToEdit: 1 }],
+            plugins: [{
+                ptype: 'cellediting',
+                clicksToEdit: 1,
+                listeners: {
+                    // a tag acompanha o nome enquanto ainda for a derivada dele ("Modelo" → "CSLOG" troca a tag
+                    // também); quem editou a tag à mão fica com a tag que escolheu
+                    edit: (ed, ctx) => {
+                        if (ctx.field !== 'nome' || ctx.value === ctx.originalValue) {
+                            return;
+                        }
+                        let rec = ctx.record;
+                        let tag = (rec.get('tag') || '').trim();
+                        let nova = tagDoNome((ctx.value || '').trim());
+                        if (tag && tag === tagDoNome((ctx.originalValue || '').trim()) && nova && TAG_OK.test(nova)) {
+                            rec.set('tag', nova);
+                        }
+                    },
+                },
+            }],
             listeners: {
                 cellclick: (view, td, ci, rec, tr, ri, e) => {
                     let coluna = view.getHeaderCt().getHeaderAtIndex(ci);
