@@ -8,7 +8,7 @@
 # Grupos, ordem, cores, estilo e liga/desliga do visual: na interface web,
 # botão direito → "Grupos da árvore…".
 set -e
-VERSAO=1.0.0   # trocado pelo scripts/release.sh a cada versão
+VERSAO=1.0.1   # trocado pelo scripts/release.sh a cada versão
 DIR=/usr/local/share/pve-organize
 JS=$DIR/pve-organize.js
 DEST=/usr/share/pve-manager/js/pve-organize.js

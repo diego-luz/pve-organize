@@ -105,7 +105,7 @@ y se detiene si algo no coincide.
 
 ```bash
 # una versión específica (p. ej. para volver a una anterior)
-bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.0/install.sh)"
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.1/install.sh)"
 # versión en desarrollo, de la rama main (sin verificación de checksum)
 REF=main bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
 ```

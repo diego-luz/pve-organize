@@ -2,7 +2,7 @@
 
 All notable changes to pve-organize. Versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.1] — 2026-11-09
 
 ### Fixed
 - Renaming a group in **Tree groups…** now renames its tag too (and the guests that use it), as long

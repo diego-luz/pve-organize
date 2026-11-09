@@ -103,7 +103,7 @@ se algo não bater.
 
 ```bash
 # uma versão específica (ex.: para voltar a uma anterior)
-bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.0/install.sh)"
+bash -c "$(curl -fsSL https://github.com/diego-luz/pve-organize/releases/download/v1.0.1/install.sh)"
 # versão em desenvolvimento, da branch main (sem conferência de checksum)
 REF=main bash -c "$(curl -fsSL https://raw.githubusercontent.com/diego-luz/pve-organize/main/install.sh)"
 ```
