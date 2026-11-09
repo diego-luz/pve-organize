@@ -14,8 +14,8 @@ All notable changes to pve-organize. Versions follow [Semantic Versioning](https
   or on a node that is down) are listed in a single message at the end, instead of one error each.
 
 ### Tested
-- Proxmox VE 8.4 in a 3-node cluster: groups and subgroups, Move to group, renaming groups, a locked
-  guest, and the case-sensitive option on and off.
+- Proxmox VE 8.4 in a 3-node cluster (case-sensitive on): groups and subgroups, Move to group,
+  renaming groups, a locked guest. Case-sensitive off: the Proxmox 8.4 web UI with a simulated API.
 
 ## [1.0.1] — 2026-11-09
 
