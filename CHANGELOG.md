@@ -2,6 +2,21 @@
 
 All notable changes to pve-organize. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **Clusters with Tag Style → case-sensitive off (the Proxmox default):** Proxmox saves tags in
+  lowercase, so guests showed under "No group" and group colors were lost. Tags are now matched
+  without regard to case, and group colors are saved in the case Proxmox uses.
+- Two groups whose tags differ only in case (`Test` and `TEST`) are refused, since Proxmox may merge
+  them.
+- Renaming a group's tag: guests that cannot be changed (locked by a backup, snapshot or migration,
+  or on a node that is down) are listed in a single message at the end, instead of one error each.
+
+### Tested
+- Proxmox VE 8.4 in a 3-node cluster: groups and subgroups, Move to group, renaming groups, a locked
+  guest, and the case-sensitive option on and off.
+
 ## [1.0.1] — 2026-11-09
 
 ### Fixed

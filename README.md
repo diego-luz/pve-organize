@@ -145,7 +145,7 @@ git checkout "$(git describe --tags --abbrev=0)"   # latest release (skip it for
 | Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Result |
 |---|---|---|---|---|
 | **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ works (dark and light themes; English, Portuguese and Spanish UI) |
-| **8.4** | 8.4.21 | — | — | ✅ works (tested on another host and network) |
+| **8.4** | 8.4.21 | — | 6.8.12-43-pve | ✅ works (3-node cluster: groups, Move to group, renaming groups, a locked guest) |
 | 8.0–8.3 | — | — | — | ⚠️ not tested; the installer allows it and warns |
 
 Older than 8 is refused by the installer. If you try it on another version, please open an
@@ -192,6 +192,12 @@ pve-organize uninstall   # remove everything that was installed
   (`<!-- pve-organize … -->`); colors live in **Datacenter → Options → Tag Style**.
   Don't edit that block by hand; the rest of your notes is left alone.
 - It only changes the web UI. Moving a guest only edits its tags.
+- Works with **Tag Style → case-sensitive** on or off. With it off (the Proxmox default), Proxmox
+  saves tags in lowercase (`Production` becomes `production`); groups and colors still match.
+  Two groups whose tags differ only in case (`Test` and `TEST`) are not allowed.
+- Renaming a group's tag updates every guest that uses it. A guest that is locked (backup,
+  snapshot, migration) or on a node that is down keeps the old tag and shows under **No group**;
+  the screen lists those guests at the end. Move them with **Move to group** when they are free.
 
 Permissions: moving a guest needs `VM.Config.Options` on it; saving the *Tree groups* screen
 needs `Sys.Modify` on `/`.

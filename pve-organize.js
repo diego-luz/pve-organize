@@ -61,6 +61,9 @@
         erroTag: ['Tag inválida em "{0}" (sem acento e sem espaço).', 'Invalid tag in "{0}" (no accents and no spaces).',
             'Etiqueta no válida en "{0}" (sin tildes y sin espacios).'],
         erroRepetida: ['A tag "{0}" está repetida.', 'The tag "{0}" is used twice.', 'La etiqueta "{0}" está repetida.'],
+        falhaRenome: ['Não foi possível trocar a tag nestes servidores (eles ficam com a tag antiga e aparecem em "Sem grupo"). Quando estiverem livres, use botão direito → Mover para grupo:',
+            'Could not change the tag on these guests (they keep the old tag and show under "No group"). When they are free, use right-click → Move to group:',
+            'No se pudo cambiar la etiqueta en estos servidores (se quedan con la etiqueta antigua y aparecen en "Sin grupo"). Cuando estén libres, usa clic derecho → Mover a grupo:'],
         erroTopo: ['Crie pelo menos um grupo de topo.', 'Create at least one top-level group.', 'Crea al menos un grupo de nivel superior.'],
         estiloA: ['A · Faixa', 'A · Band', 'A · Franja'],
         estiloB: ['B · Etiquetas', 'B · Pills', 'B · Etiquetas'],
@@ -103,14 +106,19 @@
     let AMBIENTES, FUNCOES, ESCONDER_TAGS_DOS_TITULOS, AMB, FUN, aplicarVisual;
     let CFG_ATUAL = PADRAO;
 
+    // Com o "case-sensitive" desligado (padrão do Proxmox), o Proxmox grava as tags em minúsculas:
+    // "Producao" vira "producao". Por isso a tag do servidor é comparada sem diferenciar maiúsculas.
+    const chave = (t) => String(t).toLowerCase();
     const mapa = (lista) => {
         let ordem = Object.create(null),
-            nome = Object.create(null);
+            nome = Object.create(null),
+            achar = Object.create(null); // chave minúscula → tag como está na configuração
         lista.forEach(([tag, n], i) => {
             ordem[tag] = i;
             nome[tag] = n;
+            achar[chave(tag)] = tag;
         });
-        return { ordem, nome };
+        return { ordem, nome, achar };
     };
     const usarConfig = (cfg) => {
         CFG_ATUAL = cfg;
@@ -127,12 +135,16 @@
 
     const isGuest = (d) => d && (d.type === 'qemu' || d.type === 'lxc');
     const tagsDe = (d) => (d.tags || '').split(/[,; ]/).filter((t) => !!t);
-    const ambienteDe = (d) => tagsDe(d).find((t) => t in AMB.ordem) || '';
-    const funcaoDe = (d) => tagsDe(d).find((t) => t in FUN.ordem) || '';
+    // devolvem a tag como está na configuração (não como está no servidor)
+    const grupoDe = (d, M) => tagsDe(d).map((t) => M.achar[chave(t)]).find((t) => t !== undefined) || '';
+    const ambienteDe = (d) => grupoDe(d, AMB);
+    const funcaoDe = (d) => grupoDe(d, FUN);
+    const ehGrupo = (t) => chave(t) in AMB.achar || chave(t) in FUN.achar;
     const ordemAmb = (a) => (a in AMB.ordem ? AMB.ordem[a] : 99);
     const ordemFun = (f) => (f in FUN.ordem ? FUN.ordem[f] : 99);
     const corDe = (tag, padrao) => {
-        let rgb = tag && PVE.UIOptions.tagOverrides[tag];
+        let cores = PVE.UIOptions.tagOverrides;
+        let rgb = tag && (cores[tag] || cores[chave(tag)]);
         return rgb ? Proxmox.Utils.rgbToCss(rgb) : padrao;
     };
     const textoSobre = (css) => {
@@ -204,7 +216,7 @@
         let html;
         if (ESCONDER_TAGS_DOS_TITULOS) {
             let original = d.tags;
-            d.tags = tagsDe(d).filter((t) => t !== amb && t !== fun).join(';');
+            d.tags = tagsDe(d).filter((t) => chave(t) !== chave(amb) && chave(t) !== chave(fun)).join(';');
             try {
                 html = renderOriginal.apply(this, arguments);
             } finally {
@@ -369,7 +381,7 @@
     });
 
     const moverPara = (d, amb, fun) => {
-        let outras = tagsDe(d).filter((t) => !(t in AMB.ordem) && !(t in FUN.ordem));
+        let outras = tagsDe(d).filter((t) => !ehGrupo(t));
         let novas = [amb, fun].filter((t) => !!t).concat(outras);
         let params = novas.length ? { tags: novas.join(';') } : { delete: 'tags' };
         Proxmox.Utils.API2Request({
@@ -464,7 +476,7 @@
         return f(0) + f(8) + f(4);
     };
     const contarServidores = (tag) =>
-        PVE.data.ResourceStore.getData().items.filter((r) => isGuest(r.data) && tagsDe(r.data).includes(tag)).length;
+        PVE.data.ResourceStore.getData().items.filter((r) => isGuest(r.data) && tagsDe(r.data).some((t) => chave(t) === chave(tag))).length;
 
     // "color-map" do Tag Style nativo → { tag: 'fundo' ou 'fundo:texto' }
     const mapaDeCores = (estiloTags) => {
@@ -552,7 +564,7 @@
                         let rec = ctx.record;
                         let tag = (rec.get('tag') || '').trim();
                         let nova = tagDoNome((ctx.value || '').trim());
-                        if (tag && tag === tagDoNome((ctx.originalValue || '').trim()) && nova && TAG_OK.test(nova)) {
+                        if (tag && chave(tag) === chave(tagDoNome((ctx.originalValue || '').trim())) && nova && TAG_OK.test(nova)) {
                             rec.set('tag', nova);
                         }
                     },
@@ -787,10 +799,11 @@
                             erros.push(T('erroTag', Ext.String.htmlEncode(nome)));
                             return;
                         }
-                        if (vistas[tag]) {
-                            erros.push(T('erroRepetida', tag));
+                        // "Teste" e "TESTE" contam como a mesma tag (o Proxmox pode juntar as duas)
+                        if (vistas[chave(tag)]) {
+                            erros.push(T('erroRepetida', Ext.String.htmlEncode(tag)));
                         }
-                        vistas[tag] = true;
+                        vistas[chave(tag)] = true;
                         let orig = r.get('orig');
                         if (orig && orig !== tag) {
                             renomes.push([orig, tag]);
@@ -833,6 +846,18 @@
                 // cores: no "Tag Style" nativo, mantendo as cores de outras tags
                 let estiloTags = Ext.apply({}, dados['tag-style'] || {});
                 let mapaCores = mapaDeCores(estiloTags);
+                // case-sensitive desligado: os servidores ficam com a tag em minúsculas e o Proxmox procura a
+                // cor pelo nome exato, então a cor é gravada em minúsculas também
+                let sensivel = !!Number(estiloTags['case-sensitive'] || 0);
+                let corDaTag = (t) => mapaCores[t] || (sensivel ? '' : Object.entries(mapaCores)
+                    .filter(([k]) => chave(k) === chave(t)).map(([, c]) => c)[0]) || '';
+                let tirarCor = (t) => Object.keys(mapaCores)
+                    .filter((k) => k === t || (!sensivel && chave(k) === chave(t)))
+                    .forEach((k) => delete mapaCores[k]);
+                let porCor = (t, c) => {
+                    tirarCor(t);
+                    mapaCores[sensivel ? t : chave(t)] = c;
+                };
 
                 // cor que cada tag tinha antes de virar grupo ('' = sem cor própria), para devolver ao remover.
                 // Sem configuração salva, os grupos de exemplo ainda não mudaram a cor de nenhuma tag.
@@ -848,17 +873,17 @@
                             coresOrig[t] = origAntes[t];
                         }
                     } else {
-                        coresOrig[t] = mapaCores[t] || '';
+                        coresOrig[t] = corDaTag(t);
                     }
                 });
                 tagsAntes.filter((t) => !tagsAgora.includes(t)).forEach((t) => {
                     if (renomeadas.includes(t)) {
-                        delete mapaCores[t]; // a tag some dos servidores
+                        tirarCor(t); // a tag some dos servidores
                     } else if (Object.hasOwn(origAntes, t)) {
                         if (origAntes[t]) {
-                            mapaCores[t] = origAntes[t];
+                            porCor(t, origAntes[t]);
                         } else {
-                            delete mapaCores[t]; // volta à cor automática do Proxmox
+                            tirarCor(t); // volta à cor automática do Proxmox
                         }
                     }
                 });
@@ -872,7 +897,7 @@
                         g = parseInt(cor.slice(2, 4), 16),
                         b = parseInt(cor.slice(4, 6), 16);
                     let texto = 0.299 * r + 0.587 * g + 0.114 * b > 160 ? '000000' : 'ffffff';
-                    mapaCores[tag] = `${cor}:${texto}`;
+                    porCor(tag, `${cor}:${texto}`);
                 });
                 estiloTags['color-map'] = Object.entries(mapaCores).map(([t, c]) => `${t}:${c}`).join(';');
                 let estiloTxt = Object.entries(estiloTags)
@@ -891,19 +916,32 @@
                         salvo = true;
                         usarConfig(cfg);
                         // tags renomeadas: atualizar os servidores que usavam a antiga
-                        let troca = Object.fromEntries(renomes);
-                        PVE.data.ResourceStore.getData().items.forEach((r) => {
-                            let d = r.data;
-                            if (!isGuest(d) || !tagsDe(d).some((t) => Object.hasOwn(troca, t))) {
+                        let troca = Object.fromEntries(renomes.map(([antiga, nova]) => [chave(antiga), nova]));
+                        let trocar = (t) => (Object.hasOwn(troca, chave(t)) ? troca[chave(t)] : t);
+                        let alvos = PVE.data.ResourceStore.getData().items.map((r) => r.data)
+                            .filter((d) => isGuest(d) && tagsDe(d).some((t) => Object.hasOwn(troca, chave(t))));
+                        // servidor travado (backup, snapshot, migração) ou nó fora do ar: um aviso só no fim
+                        let falhas = [],
+                            faltam = alvos.length;
+                        let terminou = () => {
+                            if (--faltam > 0 || !falhas.length) {
                                 return;
                             }
-                            let tags = tagsDe(d).map((t) => (Object.hasOwn(troca, t) ? troca[t] : t));
+                            Ext.Msg.alert(gettext('Error'), T('falhaRenome') + '<br><br>' + falhas.join('<br>'));
+                            PVE.data.ResourceStore.load();
+                        };
+                        alvos.forEach((d) => {
+                            let tags = tagsDe(d).map(trocar);
                             Proxmox.Utils.API2Request({
                                 url: `/nodes/${d.node}/${d.type}/${d.vmid}/config`,
                                 method: 'PUT',
                                 params: { tags: [...new Set(tags)].join(';') },
-                                failure: (response) => Ext.Msg.alert(gettext('Error'),
-                                    `${d.vmid} (${Ext.String.htmlEncode(d.name || '')}): ${response.htmlStatus}`),
+                                success: terminou,
+                                failure: (response) => {
+                                    falhas.push(`${d.vmid} (${Ext.String.htmlEncode(d.name || '')}): `
+                                        + (response.htmlStatus || ''));
+                                    terminou();
+                                },
                             });
                         });
                         PVE.UIOptions.update();

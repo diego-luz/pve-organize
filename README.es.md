@@ -146,7 +146,7 @@ git checkout "$(git describe --tags --abbrev=0)"   # última versión (omítelo 
 | Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Resultado |
 |---|---|---|---|---|
 | **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (tema oscuro y claro; interfaz en inglés, portugués y español) |
-| **8.4** | 8.4.21 | — | — | ✅ funciona (probado en otro host y otra red) |
+| **8.4** | 8.4.21 | — | 6.8.12-43-pve | ✅ funciona (clúster de 3 nodos: grupos, Mover a grupo, renombrar grupos, servidor bloqueado) |
 | 8.0–8.3 | — | — | — | ⚠️ no probado; el instalador lo permite y avisa |
 
 Las versiones anteriores a la 8 son rechazadas por el instalador. Si lo pruebas en otra versión,
@@ -195,6 +195,14 @@ pve-organize desinstalar   # quita todo lo instalado (también: uninstall)
   (`<!-- pve-organize … -->`); los colores en **Datacenter → Opciones → Tag Style**.
   No edites ese bloque a mano; el resto de tus notas no se toca.
 - Solo cambia la interfaz web. Mover un servidor solo cambia sus etiquetas.
+- Funciona con **Tag Style → case-sensitive** activado o desactivado. Desactivado (el valor por
+  defecto de Proxmox), Proxmox guarda las etiquetas en minúsculas (`Produccion` pasa a `produccion`);
+  grupos y colores siguen coincidiendo. No se permiten dos grupos cuyas etiquetas solo difieren en
+  mayúsculas (`Pruebas` y `PRUEBAS`).
+- Renombrar la etiqueta de un grupo actualiza todos los servidores que la usan. Un servidor
+  bloqueado (backup, snapshot, migración) o en un nodo caído se queda con la etiqueta antigua y
+  aparece en **Sin grupo**; la pantalla lista esos servidores al final. Muévelos con **Mover a
+  grupo** cuando estén libres.
 
 Permisos: mover un servidor requiere `VM.Config.Options` en él; guardar la pantalla
 *Grupos del árbol* requiere `Sys.Modify` en `/`.

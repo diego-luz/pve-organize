@@ -144,7 +144,7 @@ git checkout "$(git describe --tags --abbrev=0)"   # última versão (pule para 
 | Proxmox VE | pve-manager | proxmox-widget-toolkit | Kernel | Resultado |
 |---|---|---|---|---|
 | **9.2** | 9.2.25 | 5.2.10 | 7.0.14-26-pve | ✅ funciona (tema escuro e claro; interface em inglês, português e espanhol) |
-| **8.4** | 8.4.21 | — | — | ✅ funciona (testado em outro host e outra rede) |
+| **8.4** | 8.4.21 | — | 6.8.12-43-pve | ✅ funciona (cluster de 3 nós: grupos, Mover para grupo, renomear grupos, servidor travado) |
 | 8.0–8.3 | — | — | — | ⚠️ não testado; o instalador permite e avisa |
 
 Versões anteriores à 8 são recusadas pelo instalador. Se testar em outra versão, abra uma
@@ -192,6 +192,12 @@ pve-organize desinstalar   # remove tudo o que foi instalado
   (`<!-- pve-organize … -->`); as cores ficam em **Datacenter → Opções → Tag Style**.
   Não edite esse bloco à mão; o resto das suas notas não é tocado.
 - Só muda a interface web. Mover um servidor só altera as tags dele.
+- Funciona com **Tag Style → case-sensitive** ligado ou desligado. Desligado (o padrão do Proxmox),
+  o Proxmox grava as tags em minúsculas (`Producao` vira `producao`); grupos e cores continuam
+  batendo. Dois grupos com tags que só diferem em maiúsculas (`Teste` e `TESTE`) não são aceitos.
+- Renomear a tag de um grupo atualiza todos os servidores que a usam. Um servidor travado (backup,
+  snapshot, migração) ou num nó fora do ar fica com a tag antiga e aparece em **Sem grupo**; a tela
+  lista esses servidores no fim. Mova-os com **Mover para grupo** quando estiverem livres.
 
 Permissões: mover um servidor pede `VM.Config.Options` nele; salvar a tela *Grupos da árvore*
 pede `Sys.Modify` em `/`.
