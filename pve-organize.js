@@ -5,7 +5,7 @@
 // Grupos, ordem, cores e estilo: botão direito → "Grupos da árvore…" (fica salvo nas Notas do Datacenter).
 // Dois níveis: TOPO (título grande) e SUB (subtítulo). Cada guest leva uma tag de cada, ex.: "Producao;Rede".
 (function () {
-    const VERSAO = '1.0.2'; // trocado pelo scripts/release.sh a cada versão
+    const VERSAO = '1.0.3'; // trocado pelo scripts/release.sh a cada versão
     window.PVE_ORGANIZE_VERSION = VERSAO;
     // ---------- idiomas: segue o idioma escolhido no login do Proxmox (pt, es; o resto em inglês) ----------
     const IDIOMA = (() => {
