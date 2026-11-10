@@ -15,10 +15,16 @@ DEST=/usr/share/pve-manager/js/pve-organize.js
 TPL=/usr/share/pve-manager/index.html.tpl
 MARCA=/etc/pve-organize.on
 HOOK=/etc/apt/apt.conf.d/99pve-organize
+VIGIA=/etc/systemd/system/pve-organize-vigia
+log() { logger -t pve-organize "$*" 2>/dev/null || true; }   # journalctl -t pve-organize
 
 aplicar() {
-    install -m 644 "$JS" "$DEST"
+    cmp -s "$JS" "$DEST" 2>/dev/null || install -m 644 "$JS" "$DEST"
     VER=$(md5sum "$DEST" | cut -c1-10)   # muda a cada versão: o navegador não usa cópia velha
+    # já está certo: não regrava a página (o vigia do systemd reage a cada gravação dela)
+    if grep -qF "/pve2/js/pve-organize.js?v=$VER\"" "$TPL" && [ "$(grep -c 'pve-organize\.js' "$TPL")" = 1 ]; then
+        return 0
+    fi
     sed -i '/pve-organize\.js/d' "$TPL"
     sed -i "\#/pve2/js/pvemanagerlib.js#a\\
     <script type=\"text/javascript\" src=\"/pve2/js/pve-organize.js?v=$VER\"></script>" "$TPL"
@@ -26,8 +32,10 @@ aplicar() {
         m "ERRO: não achei a linha do pvemanagerlib.js em $TPL (versão nova do Proxmox?)" \
           "ERROR: pvemanagerlib.js line not found in $TPL (new Proxmox version?)" \
           "ERROR: no encontré la línea de pvemanagerlib.js en $TPL (¿versión nueva de Proxmox?)" >&2
+        log "ERROR: pvemanagerlib.js line not found in $TPL; add-on NOT applied"
         exit 1
     }
+    log "applied to $TPL (pve-organize $VERSAO)"
 }
 remover() {
     sed -i '/pve-organize\.js/d' "$TPL"
@@ -40,7 +48,8 @@ m() { case $L in pt) echo "$1" ;; es) echo "$3" ;; *) echo "$2" ;; esac; }
 case "$1" in
     on) aplicar; touch "$MARCA"; recarregar; m "separadores LIGADOS (F5 no navegador)" "separators ON (press F5 in the browser)" "separadores ACTIVADOS (F5 en el navegador)";;
     off) remover; rm -f "$MARCA"; recarregar; m "separadores DESLIGADOS (F5 no navegador)" "separators OFF (press F5 in the browser)" "separadores DESACTIVADOS (F5 en el navegador)";;
-    reaplicar) [ -e "$MARCA" ] && aplicar || true;;   # usado pelo hook do apt depois de atualizar o Proxmox
+    # usado pelo vigia do systemd (assim que o Proxmox troca a página) e pelo hook do apt (no fim da atualização)
+    reaplicar) [ -e "$MARCA" ] && aplicar || true;;
     status)
         if [ -e "$MARCA" ] && grep -q pve-organize.js "$TPL"; then
             m "pve-organize $VERSAO: LIGADO" "pve-organize $VERSAO: ON" "pve-organize $VERSAO: ACTIVADO"
@@ -54,6 +63,14 @@ case "$1" in
         else
             m "  hook do apt   : ausente" "  apt hook      : missing" "  hook de apt   : ausente"
         fi
+        if systemctl is-active -q pve-organize-vigia.path 2>/dev/null; then
+            m "  vigia         : ativo (reaplica segundos depois de o Proxmox trocar a página)" \
+              "  watcher       : active (re-applies seconds after Proxmox replaces the page)" \
+              "  vigilante     : activo (se reaplica segundos después de que Proxmox cambie la página)"
+        else
+            m "  vigia         : inativo (reinstale para ativar)" "  watcher       : inactive (reinstall to enable it)" \
+              "  vigilante     : inactivo (reinstala para activarlo)"
+        fi
         PV=$(pveversion 2>/dev/null | sed -n 's#^pve-manager/\([^/ ]*\).*#\1#p')
         [ -n "$PV" ] && echo "  Proxmox VE    : $PV"
         m "  grupos, cores e estilo: botão direito → \"Grupos da árvore…\" na interface" \
@@ -61,6 +78,8 @@ case "$1" in
           "  grupos, colores y estilo: clic derecho → \"Grupos del árbol…\" en la interfaz";;
     version|versao|--version|-v) echo "pve-organize $VERSAO";;
     desinstalar|uninstall)
+        systemctl disable --now pve-organize-vigia.path >/dev/null 2>&1 || true
+        rm -f "$VIGIA.path" "$VIGIA.service"; systemctl daemon-reload 2>/dev/null || true
         remover; rm -f "$MARCA" "$HOOK"; recarregar
         rm -rf "$DIR"; rm -f /usr/local/bin/pve-organize
         m "Removido (F5 no navegador). Grupos e cores continuam nas Notas do Datacenter e no Tag Style." \

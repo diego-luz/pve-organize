@@ -2,6 +2,26 @@
 
 All notable changes to pve-organize. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.0.3] — 2026-11-09
+
+### Added
+- **Watcher** (`pve-organize-vigia.path`, systemd): when a Proxmox update replaces the web UI page,
+  the add-on is put back within seconds. Before, the apt hook only did it when the whole `apt` run
+  ended, so the groups disappeared for the length of the update (minutes, with a new kernel).
+  The apt hook stays as a second check. `pve-organize status` shows the watcher.
+- README: what to expect after a Proxmox update (no need to reinstall; Ctrl+F5).
+
+### Changed
+- `pve-organize reaplicar` only rewrites the page when the add-on line is missing or outdated, and
+  logs to the journal (`journalctl -t pve-organize`), including the error when a new Proxmox page
+  cannot be patched. Before, the apt hook discarded every message.
+- `pve-organize uninstall` also removes the watcher.
+
+### Tested
+- Watcher, on a local copy of the Proxmox 8.4 page: replacing the page the way `dpkg` does puts the
+  line back in about 0.1 s, the add-on's own write does not loop, and a page without the
+  `pvemanagerlib.js` line logs an error.
+
 ## [1.0.2] — 2026-11-09
 
 ### Fixed

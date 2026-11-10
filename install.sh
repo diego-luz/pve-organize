@@ -95,6 +95,29 @@ cat > "$HOOK" <<'HOOKEOF'
 DPkg::Post-Invoke { "/usr/local/bin/pve-organize reaplicar >/dev/null 2>&1 || true"; };
 HOOKEOF
 
+info "$(m 'vigia do systemd (reaplica assim que o Proxmox troca a página da interface)' 'systemd watcher (re-applies as soon as Proxmox replaces the web UI page)' 'vigilante de systemd (se reaplica en cuanto Proxmox cambia la página de la interfaz)')"
+cat > /etc/systemd/system/pve-organize-vigia.path <<UNITEOF
+[Unit]
+Description=pve-organize: watch the Proxmox web UI page and re-apply after updates
+
+[Path]
+PathChanged=$TPL
+
+[Install]
+WantedBy=paths.target
+UNITEOF
+cat > /etc/systemd/system/pve-organize-vigia.service <<'UNITEOF'
+[Unit]
+Description=pve-organize: re-apply to the Proxmox web UI page
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pve-organize reaplicar
+UNITEOF
+systemctl daemon-reload
+systemctl enable --now pve-organize-vigia.path >/dev/null 2>&1 \
+    || info "$(m 'aviso: não consegui ativar o vigia; o hook do apt continua valendo' 'warning: could not enable the watcher; the apt hook still works' 'aviso: no pude activar el vigilante; el hook de apt sigue funcionando')"
+
 /usr/local/bin/pve-organize on
 echo
 m "Pronto! Agora:

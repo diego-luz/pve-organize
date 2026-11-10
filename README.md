@@ -75,7 +75,7 @@ keeping the **Server View** you already use, just organized.
 | Settings screen in the web UI | ✅ | — | — | ❌ |
 | Config shared by the whole cluster | ✅ | ✅ | ✅ | ✅ (tags) |
 | Leaves Proxmox files untouched | ✅ (injects one script) | ✅ | ✅ | ❌ |
-| Survives `apt upgrade` | ✅ (apt hook) | ✅ | ✅ | usually ❌ |
+| Survives `apt upgrade` | ✅ (watcher + apt hook) | ✅ | ✅ | usually ❌ |
 | Official / supported by Proxmox | ❌ | ✅ | ✅ | ❌ |
 
 If you need permissions per group, use **pools** — pve-organize is only visual and can be used
@@ -173,7 +173,7 @@ Guests without a known top-level tag appear at the end, under **No group**.
 In the node's shell (web UI **>_ Shell** or SSH), as `root`:
 
 ```bash
-pve-organize status      # version, ON/OFF, web UI script, apt hook, Proxmox version
+pve-organize status      # version, ON/OFF, web UI script, apt hook, watcher, Proxmox version
 pve-organize version     # installed version
 pve-organize off         # remove from the web UI (settings are kept)
 pve-organize on          # load it again
@@ -187,7 +187,9 @@ pve-organize uninstall   # remove everything that was installed
 - `/usr/local/share/pve-organize/pve-organize.js` is copied to `/usr/share/pve-manager/js/`
   and one `<script>` line is added to `/usr/share/pve-manager/index.html.tpl`.
   A clean copy of that page is kept in `/usr/local/share/pve-organize/index.html.tpl.original`.
-- An apt hook (`/etc/apt/apt.conf.d/99pve-organize`) puts the line back after Proxmox updates.
+- A systemd watcher (`pve-organize-vigia.path`) puts the line back seconds after a Proxmox update
+  replaces that page, and an apt hook (`/etc/apt/apt.conf.d/99pve-organize`) checks again when
+  the update ends. Messages go to the journal: `journalctl -t pve-organize`.
 - Groups, order and style live in a hidden block at the end of **Datacenter → Notes**
   (`<!-- pve-organize … -->`); colors live in **Datacenter → Options → Tag Style**.
   Don't edit that block by hand; the rest of your notes is left alone.
@@ -209,6 +211,16 @@ needs `Sys.Modify` on `/`.
 - **Uninstall**: `pve-organize uninstall`, then F5. Your groups stay in the Datacenter Notes and
   Tag Style; delete them there if you want.
 - **Something looks wrong?** `pve-organize off` and F5 brings back the stock Proxmox tree.
+
+### After a Proxmox update
+
+An update of the `pve-manager` package replaces the Proxmox web page, which removes the add-on for
+a moment. **You don't need to reinstall:** the watcher puts it back within seconds (versions before
+1.0.3 only did it when the whole `apt` run finished, which can take minutes).
+
+- Groups missing after an update? Wait for the update to finish and press **Ctrl+F5**.
+- Still missing? Run `pve-organize status`, then `pve-organize on`, and look at
+  `journalctl -t pve-organize` — if a new Proxmox version changed the page, the error is there.
 
 ## Translations
 

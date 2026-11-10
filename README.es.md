@@ -76,7 +76,7 @@ que crean carpetas. Resuelven problemas parecidos; pve-organize apunta a otro: m
 | Pantalla de configuración en la interfaz web | ✅ | — | — | ❌ |
 | Configuración válida para todo el clúster | ✅ | ✅ | ✅ | ✅ (etiquetas) |
 | No modifica archivos de Proxmox | ✅ (inyecta un script) | ✅ | ✅ | ❌ |
-| Sobrevive a `apt upgrade` | ✅ (hook de apt) | ✅ | ✅ | normalmente ❌ |
+| Sobrevive a `apt upgrade` | ✅ (vigilante + hook de apt) | ✅ | ✅ | normalmente ❌ |
 | Oficial / soportado por Proxmox | ❌ | ✅ | ✅ | ❌ |
 
 Si necesitas permisos por grupo, usa **pools** — pve-organize es solo visual y se puede usar
@@ -175,7 +175,7 @@ Los servidores sin una etiqueta de nivel superior conocida aparecen al final, en
 En la terminal del nodo (**>_ Shell** de la interfaz web o SSH), como `root`:
 
 ```bash
-pve-organize status        # versión, activado/desactivado, script en la interfaz, hook de apt, versión de Proxmox
+pve-organize status        # versión, activado/desactivado, script en la interfaz, hook de apt, vigilante, versión de Proxmox
 pve-organize version       # versión instalada
 pve-organize off           # lo quita de la interfaz (la configuración se conserva)
 pve-organize on            # lo carga de nuevo
@@ -189,8 +189,10 @@ pve-organize desinstalar   # quita todo lo instalado (también: uninstall)
 - `/usr/local/share/pve-organize/pve-organize.js` se copia a `/usr/share/pve-manager/js/` y se
   añade una línea `<script>` a `/usr/share/pve-manager/index.html.tpl`. Una copia limpia de esa
   página queda en `/usr/local/share/pve-organize/index.html.tpl.original`.
-- Un hook de apt (`/etc/apt/apt.conf.d/99pve-organize`) vuelve a poner la línea tras las
-  actualizaciones de Proxmox.
+- Un vigilante de systemd (`pve-organize-vigia.path`) vuelve a poner la línea segundos después de
+  que una actualización de Proxmox reemplace esa página, y un hook de apt
+  (`/etc/apt/apt.conf.d/99pve-organize`) lo comprueba otra vez al final de la actualización.
+  Los mensajes van al journal: `journalctl -t pve-organize`.
 - Grupos, orden y estilo se guardan en un bloque oculto al final de **Datacenter → Notas**
   (`<!-- pve-organize … -->`); los colores en **Datacenter → Opciones → Tag Style**.
   No edites ese bloque a mano; el resto de tus notas no se toca.
@@ -214,6 +216,16 @@ Permisos: mover un servidor requiere `VM.Config.Options` en él; guardar la pant
 - **Desinstalar**: `pve-organize desinstalar` y F5. Los grupos siguen en las Notas del Datacenter
   y en Tag Style; bórralos allí si quieres.
 - **¿Algo se ve raro?** `pve-organize off` y F5 devuelven el árbol original de Proxmox.
+
+### Después de una actualización de Proxmox
+
+Una actualización del paquete `pve-manager` reemplaza la página de la interfaz de Proxmox, y el
+complemento desaparece por un momento. **No hace falta reinstalar:** el vigilante lo vuelve a poner
+en segundos (antes de la 1.0.3 solo ocurría cuando `apt` terminaba todo, lo que puede tardar minutos).
+
+- ¿Los grupos desaparecieron tras actualizar? Espera a que termine la actualización y pulsa **Ctrl+F5**.
+- ¿Siguen sin aparecer? Ejecuta `pve-organize status`, luego `pve-organize on`, y mira
+  `journalctl -t pve-organize`: si una versión nueva de Proxmox cambió la página, el error está ahí.
 
 ## Traducciones
 
