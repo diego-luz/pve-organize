@@ -379,7 +379,7 @@
         <article class="card"><div class="ico"><svg><use href="#i-pointer"/></svg></div><h3 data-i18n="f3.t">Right-click → Move to group</h3><p data-i18n="f3.d">Change a guest's group in two clicks, straight from the tree.</p></article>
         <article class="card"><div class="ico"><svg><use href="#i-palette"/></svg></div><h3 data-i18n="f4.t">Tree groups screen</h3><p data-i18n="f4.d">Create groups, pick colors or let them be automatic, drag to reorder, 6 styles, counter, indent and an ON/OFF switch — with live preview.</p></article>
         <article class="card"><div class="ico"><svg><use href="#i-users"/></svg></div><h3 data-i18n="f5.t">Shared by the whole cluster</h3><p data-i18n="f5.d">Settings live in the Datacenter Notes and Tag Style, so every admin and browser sees the same tree.</p></article>
-        <article class="card"><div class="ico"><svg><use href="#i-refresh"/></svg></div><h3 data-i18n="f6.t">Survives Proxmox updates</h3><p data-i18n="f6.d">An apt hook puts it back after upgrades. Follows the Proxmox language: English, Portuguese and Spanish.</p></article>
+        <article class="card"><div class="ico"><svg><use href="#i-refresh"/></svg></div><h3 data-i18n="f6.t">Survives Proxmox updates</h3><p data-i18n="f6.d">Comes back by itself seconds after a Proxmox update — no reinstall. Follows the Proxmox language: English, Portuguese and Spanish.</p></article>
       </div>
     </div>
   </section>
@@ -421,7 +421,7 @@
             <tr><td data-i18n="cmp.r5">Settings screen in the web UI</td><td class="me y">✓</td><td class="m">—</td><td class="m">—</td><td class="n">✗</td></tr>
             <tr><td data-i18n="cmp.r6">Settings shared by the whole cluster</td><td class="me y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y" data-i18n="cmp.tags">✓ (tags)</td></tr>
             <tr><td data-i18n="cmp.r7">Does not modify Proxmox files</td><td class="me y" data-i18n="cmp.inject">✓ injects a script</td><td class="y">✓</td><td class="y">✓</td><td class="n">✗</td></tr>
-            <tr><td data-i18n="cmp.r8">Survives apt upgrade</td><td class="me y" data-i18n="cmp.hook">✓ apt hook</td><td class="y">✓</td><td class="y">✓</td><td class="m" data-i18n="cmp.usually">usually ✗</td></tr>
+            <tr><td data-i18n="cmp.r8">Survives apt upgrade</td><td class="me y" data-i18n="cmp.hook">✓ watcher + apt hook</td><td class="y">✓</td><td class="y">✓</td><td class="m" data-i18n="cmp.usually">usually ✗</td></tr>
             <tr><td data-i18n="cmp.r9">Official / supported by Proxmox</td><td class="me n">✗</td><td class="y">✓</td><td class="y">✓</td><td class="n">✗</td></tr>
           </tbody>
         </table>
@@ -477,7 +477,7 @@
         </div>
         <div class="term"><div class="term-box">
           <div class="term-bar"><i></i><i></i><i></i><span class="lbl">bash</span></div>
-          <pre><span class="ps"># </span>pve-organize status   <span class="c"># version, on/off, apt hook…</span>
+          <pre><span class="ps"># </span>pve-organize status   <span class="c"># version, on/off, watcher…</span>
 <span class="ps"># </span>pve-organize off      <span class="c"># remove from the UI, keep config</span>
 <span class="ps"># </span>pve-organize on       <span class="c"># load it again</span>
 <span class="ps"># </span>pve-organize uninstall</pre>
@@ -497,7 +497,7 @@
       <div class="checks">
         <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c1.t">Only the web UI changes</b><span data-i18n="c1.d">Moving a guest only edits its tags.</span></div></div>
         <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c2.t">One line injected</b><span data-i18n="c2.d">A script tag in the page template; a clean copy is kept.</span></div></div>
-        <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c3.t">apt hook</b><span data-i18n="c3.d">Puts the line back after Proxmox updates.</span></div></div>
+        <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c3.t">Watcher + apt hook</b><span data-i18n="c3.d">Puts the line back seconds after a Proxmox update replaces the page.</span></div></div>
         <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c4.t">Verified downloads</b><span data-i18n="c4.d">Every release file is checked against SHA256SUMS.</span></div></div>
         <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c5.t">Respects permissions</b><span data-i18n="c5.d">Moving needs VM.Config.Options; saving the screen needs Sys.Modify on /.</span></div></div>
         <div class="check"><svg><use href="#i-check"/></svg><div><b data-i18n="c6.t">Names are escaped</b><span data-i18n="c6.d">No script injection through group names.</span></div></div>
@@ -512,7 +512,7 @@
       <div class="faq">
         <details><summary data-i18n="q1">Is it free?</summary><div class="ans" data-i18n="a1">Yes. pve-organize is open source under the MIT license.</div></details>
         <details><summary data-i18n="q2">Does it change my VMs or containers?</summary><div class="ans" data-i18n="a2">Only their tags, and only when you move a guest to a group. Groups, order and style are saved in a hidden block at the end of Datacenter → Notes; colors go to Datacenter → Options → Tag Style. The rest of your notes is untouched.</div></details>
-        <details><summary data-i18n="q3">What happens when I update Proxmox?</summary><div class="ans" data-i18n="a3">An apt hook re-applies the add-on after Proxmox updates. If something ever looks wrong, pve-organize off and F5 bring back the original tree.</div></details>
+        <details><summary data-i18n="q3">What happens when I update Proxmox?</summary><div class="ans" data-i18n="a3">An update of pve-manager replaces the Proxmox page and the add-on disappears for a moment. You don't need to reinstall: a systemd watcher puts it back within seconds — then press Ctrl+F5. Still missing? Run pve-organize on and check journalctl -t pve-organize. pve-organize off and F5 always bring back the original tree.</div></details>
         <details><summary data-i18n="q4">Do I need to install it on every node?</summary><div class="ans" data-i18n="a4">On each node whose web UI you open. The configuration itself is stored at the Datacenter level, so all nodes and browsers share the same groups.</div></details>
         <details><summary data-i18n="q5">Can I use it together with pools?</summary><div class="ans" data-i18n="a5">Yes. pve-organize is purely visual. If you need permissions per group, keep using pools for that.</div></details>
         <details><summary data-i18n="q6">How do I update or uninstall?</summary><div class="ans" data-i18n-html="a6">To update, run the install command again — it always fetches the latest release. To remove it, run <code>pve-organize uninstall</code> and press F5. What changed in each version is in the <a href="https://github.com/diego-luz/pve-organize/blob/main/CHANGELOG.md">CHANGELOG</a>.</div></details>
@@ -582,12 +582,12 @@
     'f3.t': 'Botão direito → Mover para grupo', 'f3.d': 'Troque o grupo de um guest em dois cliques, direto na árvore.',
     'f4.t': 'Tela Grupos da árvore', 'f4.d': 'Crie grupos, escolha cores ou deixe automático, arraste para ordenar, 6 estilos, contador, recuo e um botão de liga/desliga — com prévia ao vivo.',
     'f5.t': 'Vale para o cluster inteiro', 'f5.d': 'A configuração fica nas Notas do Datacenter e no Tag Style, então todos os administradores e navegadores veem a mesma árvore.',
-    'f6.t': 'Continua depois das atualizações', 'f6.d': 'Um hook do apt recoloca o complemento depois dos upgrades. Segue o idioma do Proxmox: português, inglês e espanhol.',
+    'f6.t': 'Continua depois das atualizações', 'f6.d': 'Volta sozinho segundos depois de uma atualização do Proxmox — sem reinstalar. Segue o idioma do Proxmox: português, inglês e espanhol.',
     'sc.title': 'Deixe com a sua cara', 'sc.lead': 'Seis estilos de cabeçalho, tema escuro e claro e uma tela de configuração dentro da interface do Proxmox.',
     'cmp.title': 'Por que não a Tag View ou os pools?',
     'cmp.lead': 'O Proxmox VE já tem a Tag View (desde o 8.3) e a Pool View. Elas resolvem problemas parecidos; o pve-organize mantém a Server View que você já usa, só que organizada.',
     'cmp.mods': 'Mods que substituem o pvemanagerlib.js', 'cmp.varies': 'varia', 'cmp.pertag': '✗ uma vez por tag', 'cmp.tags': '✓ (tags)',
-    'cmp.inject': '✓ injeta um script', 'cmp.hook': '✓ hook do apt', 'cmp.usually': 'geralmente ✗',
+    'cmp.inject': '✓ injeta um script', 'cmp.hook': '✓ vigia + hook do apt', 'cmp.usually': 'geralmente ✗',
     'cmp.r1': 'Continua na Server View (agrupada por nó)', 'cmp.r2': 'Cada guest aparece em um único lugar', 'cmp.r3': 'Dois níveis (grupo › subgrupo)',
     'cmp.r4': 'Cores nos cabeçalhos, ordem própria, estilos', 'cmp.r5': 'Tela de configuração na interface web', 'cmp.r6': 'Configuração vale para o cluster inteiro',
     'cmp.r7': 'Não altera arquivos do Proxmox', 'cmp.r8': 'Sobrevive ao apt upgrade', 'cmp.r9': 'Oficial / suportado pela Proxmox',
@@ -601,14 +601,14 @@
     'hw.eyebrow': 'Como funciona', 'hw.title': 'Transparente de propósito', 'hw.lead': 'Um único script adicionado à interface web. Leia cada linha no GitHub.',
     'c1.t': 'Só a interface web muda', 'c1.d': 'Mover um guest só altera as tags dele.',
     'c2.t': 'Uma linha injetada', 'c2.d': 'Uma tag script no modelo da página; uma cópia limpa fica guardada.',
-    'c3.t': 'Hook do apt', 'c3.d': 'Recoloca a linha depois das atualizações do Proxmox.',
+    'c3.t': 'Vigia + hook do apt', 'c3.d': 'Recoloca a linha segundos depois de uma atualização do Proxmox trocar a página.',
     'c4.t': 'Downloads conferidos', 'c4.d': 'Cada arquivo da versão é conferido com o SHA256SUMS.',
     'c5.t': 'Respeita as permissões', 'c5.d': 'Mover pede VM.Config.Options; salvar a tela pede Sys.Modify em /.',
     'c6.t': 'Nomes escapados', 'c6.d': 'Sem injeção de script pelos nomes dos grupos.',
     'faq.title': 'Perguntas frequentes',
     'q1': 'É grátis?', 'a1': 'Sim. O pve-organize é software livre sob a licença MIT.',
     'q2': 'Ele altera minhas VMs ou containers?', 'a2': 'Só as tags, e só quando você move um guest para um grupo. Grupos, ordem e estilo ficam num bloco escondido no fim de Datacenter → Notas; as cores vão para Datacenter → Opções → Tag Style. O resto das suas notas não é tocado.',
-    'q3': 'O que acontece quando atualizo o Proxmox?', 'a3': 'Um hook do apt reaplica o complemento depois das atualizações. Se algo parecer estranho, pve-organize off e F5 trazem de volta a árvore original.',
+    'q3': 'O que acontece quando atualizo o Proxmox?', 'a3': 'Uma atualização do pve-manager troca a página do Proxmox e o complemento some por um momento. Não precisa reinstalar: um vigia do systemd recoloca em segundos — depois aperte Ctrl+F5. Continua sumido? Rode pve-organize on e veja journalctl -t pve-organize. pve-organize off e F5 sempre trazem de volta a árvore original.',
     'q4': 'Preciso instalar em todos os nós?', 'a4': 'Em cada nó cuja interface web você abre. A configuração fica no nível do Datacenter, então todos os nós e navegadores compartilham os mesmos grupos.',
     'q5': 'Posso usar junto com pools?', 'a5': 'Sim. O pve-organize é só visual. Se você precisa de permissões por grupo, continue usando pools para isso.',
     'q6': 'Como atualizo ou desinstalo?', 'a6': 'Para atualizar, rode o comando de instalação de novo — ele sempre pega a última versão. Para remover, rode <code>pve-organize desinstalar</code> e aperte F5. O que mudou em cada versão está no <a href="https://github.com/diego-luz/pve-organize/blob/main/CHANGELOG.md">CHANGELOG</a>.',
@@ -640,12 +640,12 @@
     'f3.t': 'Clic derecho → Mover a grupo', 'f3.d': 'Cambia el grupo de un guest en dos clics, desde el árbol.',
     'f4.t': 'Pantalla Grupos del árbol', 'f4.d': 'Crea grupos, elige colores o déjalos automáticos, arrastra para ordenar, 6 estilos, contador, sangría y un interruptor ON/OFF — con vista previa en vivo.',
     'f5.t': 'Compartido por todo el clúster', 'f5.d': 'La configuración vive en las Notas del Datacenter y en Tag Style, así que todos los administradores y navegadores ven el mismo árbol.',
-    'f6.t': 'Sobrevive a las actualizaciones', 'f6.d': 'Un hook de apt lo vuelve a aplicar tras las actualizaciones. Sigue el idioma de Proxmox: inglés, portugués y español.',
+    'f6.t': 'Sobrevive a las actualizaciones', 'f6.d': 'Vuelve solo segundos después de una actualización de Proxmox, sin reinstalar. Sigue el idioma de Proxmox: inglés, portugués y español.',
     'sc.title': 'Que se vea como te gusta', 'sc.lead': 'Seis estilos de encabezado, tema oscuro y claro, y una pantalla de configuración dentro de la interfaz de Proxmox.',
     'cmp.title': '¿Por qué no la Tag View o los pools?',
     'cmp.lead': 'Proxmox VE ya tiene la Tag View (desde 8.3) y la Pool View. Resuelven problemas parecidos; pve-organize mantiene la Server View que ya usas, solo que organizada.',
     'cmp.mods': 'Mods que reemplazan pvemanagerlib.js', 'cmp.varies': 'varía', 'cmp.pertag': '✗ una vez por etiqueta', 'cmp.tags': '✓ (etiquetas)',
-    'cmp.inject': '✓ inyecta un script', 'cmp.hook': '✓ hook de apt', 'cmp.usually': 'normalmente ✗',
+    'cmp.inject': '✓ inyecta un script', 'cmp.hook': '✓ vigilante + hook de apt', 'cmp.usually': 'normalmente ✗',
     'cmp.r1': 'Sigue en la Server View (agrupada por nodo)', 'cmp.r2': 'Cada guest aparece en un solo lugar', 'cmp.r3': 'Dos niveles (grupo › subgrupo)',
     'cmp.r4': 'Encabezados de colores, orden propio, estilos', 'cmp.r5': 'Pantalla de configuración en la interfaz web', 'cmp.r6': 'Configuración compartida por todo el clúster',
     'cmp.r7': 'No modifica archivos de Proxmox', 'cmp.r8': 'Sobrevive a apt upgrade', 'cmp.r9': 'Oficial / soportado por Proxmox',
@@ -659,14 +659,14 @@
     'hw.eyebrow': 'Cómo funciona', 'hw.title': 'Transparente a propósito', 'hw.lead': 'Un único script añadido a la interfaz web. Lee cada línea en GitHub.',
     'c1.t': 'Solo cambia la interfaz web', 'c1.d': 'Mover un guest solo edita sus etiquetas.',
     'c2.t': 'Una línea inyectada', 'c2.d': 'Una etiqueta script en la plantilla de la página; se guarda una copia limpia.',
-    'c3.t': 'Hook de apt', 'c3.d': 'Vuelve a poner la línea tras las actualizaciones de Proxmox.',
+    'c3.t': 'Vigilante + hook de apt', 'c3.d': 'Vuelve a poner la línea segundos después de que una actualización de Proxmox cambie la página.',
     'c4.t': 'Descargas verificadas', 'c4.d': 'Cada archivo de la versión se verifica con SHA256SUMS.',
     'c5.t': 'Respeta los permisos', 'c5.d': 'Mover requiere VM.Config.Options; guardar la pantalla requiere Sys.Modify en /.',
     'c6.t': 'Nombres escapados', 'c6.d': 'Sin inyección de scripts a través de los nombres de grupo.',
     'faq.title': 'Preguntas frecuentes',
     'q1': '¿Es gratis?', 'a1': 'Sí. pve-organize es de código abierto bajo la licencia MIT.',
     'q2': '¿Modifica mis VMs o contenedores?', 'a2': 'Solo sus etiquetas, y solo cuando mueves un guest a un grupo. Grupos, orden y estilo se guardan en un bloque oculto al final de Datacenter → Notas; los colores van a Datacenter → Opciones → Tag Style. El resto de tus notas no se toca.',
-    'q3': '¿Qué pasa cuando actualizo Proxmox?', 'a3': 'Un hook de apt vuelve a aplicar el complemento tras las actualizaciones. Si algo se ve raro, pve-organize off y F5 devuelven el árbol original.',
+    'q3': '¿Qué pasa cuando actualizo Proxmox?', 'a3': 'Una actualización de pve-manager reemplaza la página de Proxmox y el complemento desaparece por un momento. No hace falta reinstalar: un vigilante de systemd lo vuelve a poner en segundos; luego pulsa Ctrl+F5. ¿Sigue sin aparecer? Ejecuta pve-organize on y mira journalctl -t pve-organize. pve-organize off y F5 siempre devuelven el árbol original.',
     'q4': '¿Tengo que instalarlo en cada nodo?', 'a4': 'En cada nodo cuya interfaz web abras. La configuración se guarda a nivel de Datacenter, así que todos los nodos y navegadores comparten los mismos grupos.',
     'q5': '¿Puedo usarlo junto con pools?', 'a5': 'Sí. pve-organize es solo visual. Si necesitas permisos por grupo, sigue usando pools para eso.',
     'q6': '¿Cómo actualizo o desinstalo?', 'a6': 'Para actualizar, vuelve a ejecutar el comando de instalación — siempre descarga la última versión. Para quitarlo, ejecuta <code>pve-organize desinstalar</code> y pulsa F5. Los cambios de cada versión están en el <a href="https://github.com/diego-luz/pve-organize/blob/main/CHANGELOG.md">CHANGELOG</a>.',
